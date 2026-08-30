@@ -1,0 +1,6 @@
+{
+  "name": "Bolt Earning Bot",
+  "description": "Telegram mini app earning dashboard powered by Adsgram with authentic Telegram user detection and real-time earnings tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
