@@ -60,47 +60,65 @@ export function ensureTelegramLaunchParams(): void {
   const fallbackInitData = `query_id=AAHpxf9kAgAAAGnG_2R_mock&user=${userJson}&auth_date=${authDate}&hash=73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3`;
 
   if (!window.Telegram) {
-    window.Telegram = {
-      WebApp: {
-        initData: fallbackInitData,
-        initDataUnsafe: {
-          query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
-          user: defaultUser,
-          auth_date: String(authDate),
-          hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
+    try {
+      window.Telegram = {
+        WebApp: {
+          initData: fallbackInitData,
+          initDataUnsafe: {
+            query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
+            user: defaultUser,
+            auth_date: String(authDate),
+            hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
+          },
+          version: '7.10',
+          platform: 'ios',
+          colorScheme: 'light',
+          themeParams: {},
+          isExpanded: true,
+          viewportHeight: window.innerHeight,
+          viewportStableHeight: window.innerHeight,
+          headerColor: '#d4af37',
+          backgroundColor: '#f6f7f9',
+          isClosingConfirmationEnabled: false,
+          ready: () => {},
+          expand: () => {},
+          close: () => {},
+          enableClosingConfirmation: () => {},
+          setHeaderColor: () => {},
+          setBackgroundColor: () => {},
+          openTelegramLink: (url: string) => window.open(url, '_blank'),
+          openLink: (url: string) => window.open(url, '_blank'),
         },
-        version: '7.10',
-        platform: 'ios',
-        colorScheme: 'light',
-        themeParams: {},
-        isExpanded: true,
-        viewportHeight: window.innerHeight,
-        viewportStableHeight: window.innerHeight,
-        headerColor: '#d4af37',
-        backgroundColor: '#f6f7f9',
-        isClosingConfirmationEnabled: false,
-        ready: () => {},
-        expand: () => {},
-        close: () => {},
-        enableClosingConfirmation: () => {},
-        setHeaderColor: () => {},
-        setBackgroundColor: () => {},
-        openTelegramLink: (url: string) => window.open(url, '_blank'),
-        openLink: (url: string) => window.open(url, '_blank'),
-      },
-    };
-  } else if (window.Telegram.WebApp) {
-    // If WebApp exists but initData is blank, inject fallback so Adsgram doesn't throw launch parameters error
-    if (!window.Telegram.WebApp.initData || window.Telegram.WebApp.initData.trim() === '') {
-      window.Telegram.WebApp.initData = fallbackInitData;
-      if (!window.Telegram.WebApp.initDataUnsafe?.user) {
-        window.Telegram.WebApp.initDataUnsafe = {
-          query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
-          user: defaultUser,
-          auth_date: String(authDate),
-          hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
-        };
+      };
+    } catch {
+      // ignore if window.Telegram is read-only
+    }
+  } else if (window.Telegram?.WebApp) {
+    // Note: window.Telegram.WebApp.initData is a read-only getter in Telegram's real SDK (telegram-web-app.js)
+    // Never do direct assignment like window.Telegram.WebApp.initData = ... as it throws "Attempted to assign to readonly property"
+    try {
+      const tgWebApp = window.Telegram.WebApp;
+      if (!tgWebApp.initData) {
+        Object.defineProperty(tgWebApp, 'initData', {
+          value: fallbackInitData,
+          writable: true,
+          configurable: true,
+        });
       }
+      if (!tgWebApp.initDataUnsafe?.user) {
+        Object.defineProperty(tgWebApp, 'initDataUnsafe', {
+          value: {
+            query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
+            user: defaultUser,
+            auth_date: String(authDate),
+            hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
+          },
+          writable: true,
+          configurable: true,
+        });
+      }
+    } catch {
+      // ignore if getters cannot be overridden
     }
   }
 

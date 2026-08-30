@@ -33,38 +33,37 @@ const STORAGE_DEBUG_KEY = 'bolt_adsgram_debug_mode';
 
 // User's configured Adsgram block IDs
 export const DEFAULT_ADSGRAM_BLOCK_ID = 'int-45220';
-export const DEFAULT_ADSGRAM_TASK_BLOCK_ID = '45229';
+export const DEFAULT_ADSGRAM_TASK_BLOCK_ID = 'task-45229';
 
 export const ADSGRAM_BLOCK_PRESETS = [
   { id: 'int-45220', label: 'Video Ads (int-45220)', type: 'video' as const, reward: 0.30 },
-  { id: '45229', label: 'Tasks (45229)', type: 'task' as const, reward: 0.50 },
+  { id: 'task-45229', label: 'Reward Tasks (task-45229)', type: 'task' as const, reward: 0.50 },
 ];
 
 /**
- * Sanitizes any block ID into what Adsgram's SDK strictly requires:
- * Must be pure numeric string (e.g. "45229") or start with "int-" followed by digits (e.g. "int-45220")
+ * Formats video block ID: must start with 'int-' (e.g. 'int-45220') or be numeric
  */
-export function sanitizeAdsgramBlockId(rawId: string): string {
+export function formatVideoBlockId(rawId: string): string {
   if (!rawId) return DEFAULT_ADSGRAM_BLOCK_ID;
   const trimmed = rawId.trim();
-
-  // Valid int-XXXX format
-  if (/^int-\d+$/.test(trimmed)) {
-    return trimmed;
-  }
-
-  // Pure numeric string e.g. "45229"
-  if (/^\d+$/.test(trimmed)) {
-    return trimmed;
-  }
-
-  // If passed with prefix like task-45229 or banner-45229, extract the digits
+  if (trimmed.startsWith('int-')) return trimmed;
   const match = trimmed.match(/\d+/);
-  if (match) {
-    return match[0];
-  }
+  return match ? `int-${match[0]}` : DEFAULT_ADSGRAM_BLOCK_ID;
+}
 
-  return DEFAULT_ADSGRAM_BLOCK_ID;
+/**
+ * Formats task block ID: must start with 'task-' (e.g. 'task-45229')
+ */
+export function formatTaskBlockId(rawId: string): string {
+  if (!rawId) return DEFAULT_ADSGRAM_TASK_BLOCK_ID;
+  const trimmed = rawId.trim();
+  if (trimmed.startsWith('task-')) return trimmed;
+  const match = trimmed.match(/\d+/);
+  return match ? `task-${match[0]}` : DEFAULT_ADSGRAM_TASK_BLOCK_ID;
+}
+
+export function sanitizeAdsgramBlockId(rawId: string, isTask: boolean = false): string {
+  return isTask ? formatTaskBlockId(rawId) : formatVideoBlockId(rawId);
 }
 
 function getInitialBlockId(): string {
@@ -205,24 +204,6 @@ export class AdsgramService {
     onProgress?: (state: string) => void,
     customBlockId?: string
   ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
-    return this.showAdOrTask(customBlockId || this.blockId, onReward, onError, onProgress);
-  }
-
-  public static async showRewardTask(
-    onReward: () => void,
-    onError?: (msg: string) => void,
-    onProgress?: (state: string) => void,
-    customTaskBlockId?: string
-  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
-    return this.showAdOrTask(customTaskBlockId || this.taskBlockId, onReward, onError, onProgress);
-  }
-
-  public static async showAdOrTask(
-    targetBlockId: string,
-    onReward: () => void,
-    onError?: (msg: string) => void,
-    onProgress?: (state: string) => void
-  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
     if (typeof window === 'undefined') {
       return { success: false, realAdsgram: false, error: 'Window not available' };
     }
@@ -230,31 +211,29 @@ export class AdsgramService {
     ensureTelegramLaunchParams();
     await this.ensureScriptLoaded();
 
-    if (window.Adsgram) {
-      const sanitizedBlock = sanitizeAdsgramBlockId(targetBlockId);
-      const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task') || sanitizedBlock === '45229';
+    const targetBlockId = formatVideoBlockId(customBlockId || this.blockId);
 
+    if (window.Adsgram) {
       try {
-        this.lastLog = `Requesting Adsgram with blockId: "${sanitizedBlock}" (original: "${targetBlockId}"), debug: ${this.debugMode}...`;
+        this.lastLog = `Requesting Adsgram Video with blockId: "${targetBlockId}", debug: ${this.debugMode}...`;
         console.log(this.lastLog);
 
         let controller = window.Adsgram.init({
-          blockId: sanitizedBlock,
+          blockId: targetBlockId,
           debug: this.debugMode,
         });
 
-        onProgress?.(isTaskBlock ? 'Adsgram task loading...' : 'Adsgram ad loading...');
+        onProgress?.('Adsgram ad loading...');
         
         let result: ShowPromiseResult;
         try {
           result = await controller.show();
         } catch (initialErr: unknown) {
           const errMsg = String(initialErr);
-          // If launch params missing outside of Telegram environment, retry with debug mode enabled
           if (errMsg.includes('launch parameters') && !this.debugMode) {
             console.log('Retrying Adsgram with debug: true for browser testing environment...');
             controller = window.Adsgram.init({
-              blockId: sanitizedBlock,
+              blockId: targetBlockId,
               debug: true,
             });
             result = await controller.show();
@@ -263,7 +242,7 @@ export class AdsgramService {
           }
         }
 
-        this.lastLog = `Adsgram result (${sanitizedBlock}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
+        this.lastLog = `Adsgram result (${targetBlockId}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
         console.log(this.lastLog);
 
         if (result.done) {
@@ -287,6 +266,144 @@ export class AdsgramService {
     const msg = 'Adsgram script is initializing, please tap again in a moment.';
     onError?.(msg);
     return { success: false, realAdsgram: false, error: msg };
+  }
+
+  public static async showRewardTask(
+    onReward: () => void,
+    onError?: (msg: string) => void,
+    onProgress?: (state: string) => void,
+    customTaskBlockId?: string
+  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
+    if (typeof window === 'undefined') {
+      return { success: false, realAdsgram: false, error: 'Window not available' };
+    }
+
+    ensureTelegramLaunchParams();
+    await this.ensureScriptLoaded();
+
+    const targetBlockId = formatTaskBlockId(customTaskBlockId || this.taskBlockId);
+    onProgress?.('Adsgram task initializing...');
+
+    return new Promise((resolve) => {
+      // Remove any prior task overlay
+      const existing = document.getElementById('adsgram-task-modal-overlay');
+      if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+      }
+
+      const overlay = document.createElement('div');
+      overlay.id = 'adsgram-task-modal-overlay';
+      overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.75);
+        padding: 16px;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.2s ease-out;
+      `;
+
+      const card = document.createElement('div');
+      card.style.cssText = `
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 20px;
+        max-width: 360px;
+        width: 100%;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        border: 2px solid #f59e0b;
+      `;
+
+      const header = document.createElement('div');
+      header.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;';
+      header.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 28px; height: 28px; border-radius: 8px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #b45309; font-size: 14px;">⚡</div>
+          <div style="font-weight: 800; font-size: 15px; color: #111827;">Adsgram Tasks</div>
+        </div>
+        <span style="font-size: 10px; font-family: monospace; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 6px; font-weight: 700;">${targetBlockId}</span>
+      `;
+
+      const taskContainer = document.createElement('div');
+      taskContainer.style.cssText = 'min-height: 70px; margin: 12px 0; display: flex; flex-direction: column; justify-content: center;';
+
+      const taskElement = document.createElement('adsgram-task');
+      taskElement.setAttribute('data-block-id', targetBlockId);
+      if (this.debugMode) {
+        taskElement.setAttribute('data-debug', 'true');
+      }
+
+      const closeBtn = document.createElement('button');
+      closeBtn.innerText = 'Close';
+      closeBtn.style.cssText = `
+        width: 100%;
+        margin-top: 14px;
+        padding: 11px;
+        border-radius: 14px;
+        background: #f3f4f6;
+        color: #374151;
+        font-weight: 700;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+      `;
+
+      let hasRewarded = false;
+
+      const cleanup = () => {
+        if (overlay.parentNode) {
+          overlay.parentNode.removeChild(overlay);
+        }
+      };
+
+      taskElement.addEventListener('reward', () => {
+        if (!hasRewarded) {
+          hasRewarded = true;
+          cleanup();
+          onReward();
+          resolve({ success: true, realAdsgram: true });
+        }
+      });
+
+      taskElement.addEventListener('onBannerNotFound', () => {
+        console.log('Adsgram Task onBannerNotFound');
+      });
+
+      taskElement.addEventListener('onError', (e: Event) => {
+        console.warn('Adsgram Task onError', e);
+      });
+
+      closeBtn.addEventListener('click', () => {
+        cleanup();
+        if (!hasRewarded) {
+          onError?.('Task wall closed');
+          resolve({ success: false, realAdsgram: true, error: 'Task closed' });
+        }
+      });
+
+      taskContainer.appendChild(taskElement);
+      card.appendChild(header);
+      card.appendChild(taskContainer);
+      card.appendChild(closeBtn);
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+    });
+  }
+
+  public static async showAdOrTask(
+    targetBlockId: string,
+    onReward: () => void,
+    onError?: (msg: string) => void,
+    onProgress?: (state: string) => void,
+    isTask: boolean = false
+  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
+    if (isTask || targetBlockId.startsWith('task-')) {
+      return this.showRewardTask(onReward, onError, onProgress, targetBlockId);
+    }
+    return this.showRewardedAd(onReward, onError, onProgress, targetBlockId);
   }
 }
 
