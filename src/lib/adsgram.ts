@@ -177,7 +177,7 @@ export class AdsgramService {
     blockId: string = DEFAULT_ADSGRAM_BLOCK_ID
   ): Promise<{ success: boolean }> {
     return new Promise((resolve) => {
-      if (onStateChange) onStateChange(`Playing Adsgram [${blockId}] (10s)...`);
+      if (onStateChange) onStateChange(`Playing video ad (5s)...`);
 
       // Create a visual overlay in preview if needed
       const overlay = document.createElement('div');
@@ -187,29 +187,30 @@ export class AdsgramService {
       overlay.style.left = '0';
       overlay.style.width = '100vw';
       overlay.style.height = '100vh';
-      overlay.style.backgroundColor = 'rgba(10, 15, 29, 0.95)';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
+      overlay.style.backdropFilter = 'blur(16px)';
       overlay.style.zIndex = '99999';
       overlay.style.display = 'flex';
       overlay.style.flexDirection = 'column';
       overlay.style.alignItems = 'center';
       overlay.style.justifyContent = 'center';
-      overlay.style.color = '#ffffff';
-      overlay.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+      overlay.style.color = '#1c1c1e';
+      overlay.style.fontFamily = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
 
       let secondsLeft = 5;
 
       overlay.innerHTML = `
-        <div style="text-align: center; max-width: 320px; padding: 24px; background: #1e293b; border-radius: 24px; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-radius: 9999px; font-size: 11px; font-weight: 700; margin-bottom: 16px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: #fbbf24;"></span>
-            ADSGRAM REWARDED VIDEO
+        <div style="text-align: center; max-width: 320px; padding: 28px 24px; background: rgba(255, 255, 255, 0.95); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 20px 50px rgba(0, 122, 255, 0.15);">
+          <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; background: rgba(0, 122, 255, 0.1); color: #007aff; border-radius: 9999px; font-size: 11px; font-weight: 700; margin-bottom: 16px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #007aff;"></span>
+            REWARDED SPONSOR VIDEO
           </div>
-          <h3 style="font-size: 18px; font-weight: 800; margin: 0 0 8px 0; color: #ffffff;">Sponsored Sponsor Clip</h3>
-          <p style="font-size: 12px; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">Watching Adsgram campaign (Block ID: <code style="color: #38bdf8;">${blockId}</code>). Reward credits automatically upon completion.</p>
-          <div style="width: 64px; height: 64px; margin: 0 auto 16px auto; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900;" id="adsgram-timer">
+          <h3 style="font-size: 18px; font-weight: 800; margin: 0 0 8px 0; color: #1c1c1e; letter-spacing: -0.02em;">Sponsored Partner Ad</h3>
+          <p style="font-size: 12px; color: #8e8e93; margin: 0 0 20px 0; line-height: 1.4;">Watch until the timer reaches zero to claim your reward credit.</p>
+          <div style="width: 64px; height: 64px; margin: 0 auto 16px auto; border-radius: 50%; background: linear-gradient(135deg, #007aff, #0056b3); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; box-shadow: 0 8px 20px rgba(0, 122, 255, 0.35);" id="adsgram-timer">
             ${secondsLeft}
           </div>
-          <div style="font-size: 11px; color: #64748b;">Do not close while video is active</div>
+          <div style="font-size: 11px; color: #a1a1aa; font-weight: 500;">Reward will be added to your balance</div>
         </div>
       `;
 
@@ -227,7 +228,7 @@ export class AdsgramService {
           if (document.body.contains(overlay)) {
             document.body.removeChild(overlay);
           }
-          if (onStateChange) onStateChange('Adsgram ad completed! +$0.30 rewarded');
+          if (onStateChange) onStateChange('Rewarded ad completed! +$0.30 credited');
           onReward();
           resolve({ success: true });
         }

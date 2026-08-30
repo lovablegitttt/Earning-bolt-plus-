@@ -11,7 +11,6 @@ import { InviteTab } from './components/InviteTab';
 import { WithdrawTab } from './components/WithdrawTab';
 import { SupportModal } from './components/SupportModal';
 import { LanguageModal } from './components/LanguageModal';
-import { BotConfigModal } from './components/BotConfigModal';
 import { TelegramSessionBadge } from './components/TelegramSessionBadge';
 
 export default function App() {
@@ -29,7 +28,6 @@ export default function App() {
   const [language, setLanguage] = useState<string>('English');
   const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
   const [showLanguageModal, setShowLanguageModal] = useState<boolean>(false);
-  const [showBotModal, setShowBotModal] = useState<boolean>(false);
   const [isLoadingAd, setIsLoadingAd] = useState<boolean>(false);
 
   // Authenticate & Load User
@@ -44,7 +42,7 @@ export default function App() {
       }
       return initial;
     }
-    // Default matching screenshot (Paul ID: 1979711369)
+    // Default matching Paul ID: 1979711369
     return getStoredUserData('1979711369', 'Paul');
   });
 
@@ -67,7 +65,7 @@ export default function App() {
         } else if (refParam === 'ads' || refParam === 'ad') {
           setActiveTab('ads');
         } else if (refParam !== String(tgUser.id)) {
-          // give invitee welcome reward if fresh
+          // Give invitee welcome reward if fresh
           if (!localStorage.getItem(`bolt_ref_credited_${tgUser.id}`)) {
             localStorage.setItem(`bolt_ref_credited_${tgUser.id}`, 'true');
             const bonusUser: UserEarningsData = {
@@ -129,11 +127,11 @@ export default function App() {
           const { user } = recordAdCompletion(userData.userId, reward, blockId);
           setUserData(user);
           triggerHaptic('success');
-          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited from Adsgram! (1m cooldown active)`);
+          setAdFeedbackMsg(`+$${reward.toFixed(2)} rewarded! 1-minute cooldown started.`);
           setTimeout(() => setAdFeedbackMsg(null), 4500);
         },
         (errMsg) => {
-          setAdFeedbackMsg(errMsg || 'Adsgram ad was closed before completion');
+          setAdFeedbackMsg(errMsg || 'Rewarded video was closed before completion');
           setTimeout(() => setAdFeedbackMsg(null), 5000);
         },
         (state) => {
@@ -147,7 +145,7 @@ export default function App() {
         setTimeout(() => setAdFeedbackMsg(null), 5000);
       }
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Adsgram playback issue';
+      const errorMsg = err instanceof Error ? err.message : 'Playback error';
       setAdFeedbackMsg(errorMsg);
       setTimeout(() => setAdFeedbackMsg(null), 5000);
     } finally {
@@ -165,22 +163,24 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9] text-neutral-900 font-sans antialiased flex flex-col justify-between max-w-md mx-auto relative shadow-2xl overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#f0f4f9] via-[#f7f9fc] to-[#eef3f8] text-neutral-900 font-sans antialiased flex flex-col justify-between max-w-md mx-auto relative shadow-[0_0_60px_rgba(0,122,255,0.06)] overflow-x-hidden">
       {/* Top Header */}
       <div>
         <Header
           userData={userData}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          language={language}
           onOpenSupport={() => setShowSupportModal(true)}
           onOpenLanguage={() => setShowLanguageModal(true)}
-          onOpenBotModal={() => setShowBotModal(true)}
         />
 
-        <TelegramSessionBadge onOpenBotModal={() => setShowBotModal(true)} />
+        <TelegramSessionBadge
+          userData={userData}
+        />
 
         {/* Dynamic Content Views */}
-        <main className="mt-2">
+        <main className="mt-1">
           {activeTab === 'ads' && (
             <AdsTab
               userData={userData}
@@ -210,7 +210,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* Bottom Sticky Navigation */}
+      {/* Bottom Sticky Glass Navigation */}
       <BottomNav
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -226,14 +226,8 @@ export default function App() {
       <LanguageModal
         isOpen={showLanguageModal}
         onClose={() => setShowLanguageModal(false)}
-        selectedLanguage={language}
+        currentLanguage={language}
         onSelectLanguage={(lang) => setLanguage(lang)}
-      />
-
-      {/* Telegram Bot Live Status & Webhook Modal */}
-      <BotConfigModal
-        isOpen={showBotModal}
-        onClose={() => setShowBotModal(false)}
       />
     </div>
   );

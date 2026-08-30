@@ -152,20 +152,24 @@ export function isRunningInTelegram(): boolean {
 export function getTelegramUser(): TelegramUser | null {
   if (typeof window === 'undefined') return null;
 
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready();
-    tg.expand();
-    try {
-      tg.setHeaderColor('#d4af37');
-      tg.setBackgroundColor('#f6f7f9');
-    } catch {
-      // safe fallback
-    }
+  try {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      try {
+        if (typeof tg.ready === 'function') tg.ready();
+        if (typeof tg.expand === 'function') tg.expand();
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#d4af37');
+        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#f6f7f9');
+      } catch {
+        // safe fallback
+      }
 
-    if (tg.initDataUnsafe?.user) {
-      return tg.initDataUnsafe.user;
+      if (tg.initDataUnsafe?.user) {
+        return tg.initDataUnsafe.user;
+      }
     }
+  } catch {
+    // safe fallback
   }
 
   return null;
