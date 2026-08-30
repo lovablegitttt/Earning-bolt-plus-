@@ -173,28 +173,27 @@ export const BotConfigModal: React.FC<BotConfigModalProps> = ({ isOpen, onClose 
           {/* Interactive Welcome Message Preview */}
           <div className="space-y-2">
             <label className="font-bold text-neutral-800 text-[11px] block">
-              Interactive Message Preview:
+              Bot Interactive Commands & Message:
             </label>
             <div className="p-3 bg-neutral-900 text-white rounded-2xl space-y-2.5 text-[11px]">
               <div className="leading-relaxed">
-                ⚡️ <b>Welcome to PayPlus Bolt Earning!</b> ⚡️<br />
-                Earn real rewards daily with Adsgram Video Ads, simple social tasks, and instant withdrawals.<br /><br />
-                💰 <b>Earning Breakdown:</b><br />
-                • <b>Watch Ads:</b> $0.30 per video<br />
-                • <b>Daily Tasks:</b> $0.50 - $1.00<br />
-                • <b>Referral Bonus:</b> $0.50 + 10% commission
+                ⚡️ <b>PayPlus Bolt Bot Commands</b> ⚡️<br />
+                • <code>/tasks</code> - Partner Tasks (<code>task-45229</code>, $0.50)<br />
+                • <code>/ads</code> - Rewarded Video Ads (<code>int-45220</code>, $0.30)<br />
+                • <code>/balance</code> - Check live balance & withdrawals<br />
+                • <code>/start</code> - Open interactive earning card
               </div>
               <div className="space-y-1.5 pt-1">
                 <div className="w-full py-2 bg-amber-500 text-neutral-950 font-bold rounded-xl text-center flex items-center justify-center gap-1.5 shadow-sm">
                   <Smartphone className="w-3.5 h-3.5" />
-                  <span>🚀 Open Mini App & Start Earning</span>
+                  <span>🚀 Open Mini App (Dashboard)</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1 text-[10px]">
-                  <div className="py-1.5 bg-white/10 rounded-lg text-center font-medium text-neutral-300">
-                    📢 Join Channel
+                  <div className="py-1.5 bg-amber-500/20 text-amber-300 rounded-lg text-center font-bold">
+                    🎯 Tasks ($0.50)
                   </div>
-                  <div className="py-1.5 bg-white/10 rounded-lg text-center font-medium text-neutral-300">
-                    💬 Support
+                  <div className="py-1.5 bg-amber-500/20 text-amber-300 rounded-lg text-center font-bold">
+                    🎬 Video Ads ($0.30)
                   </div>
                 </div>
               </div>

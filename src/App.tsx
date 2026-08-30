@@ -15,7 +15,17 @@ import { BotConfigModal } from './components/BotConfigModal';
 import { TelegramSessionBadge } from './components/TelegramSessionBadge';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('ads');
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab') || params.get('startapp') || params.get('tgWebAppStartParam');
+      if (tabParam === 'tasks' || tabParam === 'task') return 'tasks';
+      if (tabParam === 'ads' || tabParam === 'ad') return 'ads';
+      if (tabParam === 'invite' || tabParam === 'ref') return 'invite';
+      if (tabParam === 'withdraw') return 'withdraw';
+    }
+    return 'ads';
+  });
   const [language, setLanguage] = useState<string>('English');
   const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
   const [showLanguageModal, setShowLanguageModal] = useState<boolean>(false);
@@ -49,18 +59,24 @@ export default function App() {
       }
       setUserData(stored);
 
-      // Handle referral start parameter if invited
+      // Handle referral start parameter or tab routing
       const refParam = getStartParam();
-      if (refParam && refParam !== String(tgUser.id)) {
-        // give invitee welcome reward if fresh
-        if (!localStorage.getItem(`bolt_ref_credited_${tgUser.id}`)) {
-          localStorage.setItem(`bolt_ref_credited_${tgUser.id}`, 'true');
-          const bonusUser: UserEarningsData = {
-            ...stored,
-            totalBalance: Number((stored.totalBalance + 0.50).toFixed(2)),
-          };
-          saveUserData(bonusUser);
-          setUserData(bonusUser);
+      if (refParam) {
+        if (refParam === 'tasks' || refParam === 'task') {
+          setActiveTab('tasks');
+        } else if (refParam === 'ads' || refParam === 'ad') {
+          setActiveTab('ads');
+        } else if (refParam !== String(tgUser.id)) {
+          // give invitee welcome reward if fresh
+          if (!localStorage.getItem(`bolt_ref_credited_${tgUser.id}`)) {
+            localStorage.setItem(`bolt_ref_credited_${tgUser.id}`, 'true');
+            const bonusUser: UserEarningsData = {
+              ...stored,
+              totalBalance: Number((stored.totalBalance + 0.50).toFixed(2)),
+            };
+            saveUserData(bonusUser);
+            setUserData(bonusUser);
+          }
         }
       }
     }

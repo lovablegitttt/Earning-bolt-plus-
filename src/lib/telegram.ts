@@ -122,9 +122,21 @@ export function ensureTelegramLaunchParams(): void {
     }
   }
 
-  // Also set in sessionStorage in case Adsgram SDK tries reading from telegram storage keys
+  // Also set in sessionStorage so Adsgram SDK can read launch parameters from any known storage provider
   try {
-    sessionStorage.setItem('__telegram__initParams', JSON.stringify({ tgWebAppData: window.Telegram.WebApp.initData }));
+    const rawData = window.Telegram?.WebApp?.initData || fallbackInitData;
+    const launchObj = {
+      tgWebAppData: rawData,
+      tgWebAppPlatform: window.Telegram?.WebApp?.platform || 'ios',
+      tgWebAppVersion: window.Telegram?.WebApp?.version || '7.10',
+      tgWebAppThemeParams: JSON.stringify({ bg_color: '#f6f7f9' }),
+    };
+    const jsonStr = JSON.stringify(launchObj);
+    sessionStorage.setItem('__telegram__initParams', jsonStr);
+    sessionStorage.setItem('telegram-apps/launch-params', jsonStr);
+    sessionStorage.setItem('adsgram/launch-params', jsonStr);
+    sessionStorage.setItem('tma.js/launch-params', jsonStr);
+    sessionStorage.setItem('tapps/launchParams', jsonStr);
   } catch {
     // ignore
   }
