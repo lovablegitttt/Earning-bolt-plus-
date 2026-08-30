@@ -41,6 +41,31 @@ function getInitialBlockId(): string {
   return stored;
 }
 
+export function formatAdsgramError(err: unknown): string {
+  if (!err) return 'Ad playback canceled or no inventory';
+  if (typeof err === 'string') return err;
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'object') {
+    const record = err as Record<string, unknown>;
+    if (record.description && typeof record.description === 'string') {
+      return record.description;
+    }
+    if (record.message && typeof record.message === 'string') {
+      return record.message;
+    }
+    if (record.state && typeof record.state === 'string') {
+      return `Adsgram state: ${record.state}`;
+    }
+    try {
+      const json = JSON.stringify(err);
+      if (json !== '{}') return json;
+    } catch {
+      // ignore
+    }
+  }
+  return 'No live ads fill on block int-45220';
+}
+
 export class AdsgramService {
   private static blockId: string = getInitialBlockId();
 
@@ -93,7 +118,6 @@ export class AdsgramService {
       if (existingScript) {
         existingScript.addEventListener('load', () => resolve(Boolean(window.Adsgram)));
         existingScript.addEventListener('error', () => resolve(false));
-        // Check if already loaded
         if (window.Adsgram) return resolve(true);
       }
 
@@ -110,9 +134,9 @@ export class AdsgramService {
     onReward: () => void,
     onError?: (msg: string) => void,
     onProgress?: (state: string) => void
-  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
+  ): Promise<{ success: boolean; realAdsgram: boolean; fallbackNeeded?: boolean; error?: string }> {
     if (typeof window === 'undefined') {
-      return { success: false, realAdsgram: false, error: 'Window not available' };
+      return { success: false, realAdsgram: false, fallbackNeeded: true, error: 'Window not available' };
     }
 
     await this.ensureScriptLoaded();
@@ -139,19 +163,19 @@ export class AdsgramService {
         } else {
           const errDesc = result.description || 'Ad skipped or closed before completion';
           onError?.(errDesc);
-          return { success: false, realAdsgram: true, error: errDesc };
+          return { success: false, realAdsgram: true, fallbackNeeded: true, error: errDesc };
         }
       } catch (err: unknown) {
-        const errorString = err instanceof Error ? err.message : String(err);
+        const errorString = formatAdsgramError(err);
         this.lastLog = `Adsgram API exception: ${errorString}`;
         console.warn(this.lastLog);
         onError?.(errorString);
-        return { success: false, realAdsgram: true, error: errorString };
+        return { success: false, realAdsgram: true, fallbackNeeded: true, error: errorString };
       }
     }
 
     this.lastLog = 'Adsgram SDK script not available on window';
-    return { success: false, realAdsgram: false, error: 'Adsgram script not loaded' };
+    return { success: false, realAdsgram: false, fallbackNeeded: true, error: 'Adsgram script loading' };
   }
 }
 

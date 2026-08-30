@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserEarningsData, TabType } from '../types';
-import { MessageSquare, Globe, Sparkles } from 'lucide-react';
+import { MessageSquare, Globe, Bot } from 'lucide-react';
 
 interface HeaderProps {
   userData: UserEarningsData;
@@ -8,6 +8,7 @@ interface HeaderProps {
   setActiveTab: (tab: TabType) => void;
   onOpenSupport: () => void;
   onOpenLanguage: () => void;
+  onOpenBotConfig?: () => void;
   language: string;
 }
 
@@ -17,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   onOpenSupport,
   onOpenLanguage,
+  onOpenBotConfig,
   language,
 }) => {
   return (
@@ -34,31 +36,46 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Bot Live Sync Button */}
+          {onOpenBotConfig && (
+            <button
+              id="header-bot-btn"
+              onClick={onOpenBotConfig}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-amber-400 bg-neutral-900 text-white text-[11px] font-semibold shadow-xs hover:bg-neutral-800 active:scale-95 transition-transform"
+              title="Telegram Bot Live Settings"
+            >
+              <Bot className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-bold text-[10px]">Bot</span>
+            </button>
+          )}
+
           {/* Customer Support Button */}
           <button
             id="header-support-btn"
             onClick={onOpenSupport}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-300/60 bg-gradient-to-b from-[#fffef7] to-[#fbf8ea] text-[11px] font-semibold text-neutral-800 shadow-xs hover:border-amber-400 active:scale-95 transition-transform"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-amber-300/60 bg-gradient-to-b from-[#fffef7] to-[#fbf8ea] text-[11px] font-semibold text-neutral-800 shadow-xs hover:border-amber-400 active:scale-95 transition-transform"
           >
             <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
-            <div className="text-left leading-tight">
+            <div className="text-left leading-tight hidden sm:block">
               <span className="text-[9px] block text-neutral-500 font-medium leading-none">Customer</span>
               <span className="font-bold">Support</span>
             </div>
+            <span className="font-bold sm:hidden text-[10px]">Support</span>
           </button>
 
           {/* Language Selector Button */}
           <button
             id="header-language-btn"
             onClick={onOpenLanguage}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-300/60 bg-gradient-to-b from-[#fffef7] to-[#fbf8ea] text-[11px] font-semibold text-neutral-800 shadow-xs hover:border-amber-400 active:scale-95 transition-transform"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-amber-300/60 bg-gradient-to-b from-[#fffef7] to-[#fbf8ea] text-[11px] font-semibold text-neutral-800 shadow-xs hover:border-amber-400 active:scale-95 transition-transform"
           >
             <Globe className="w-3.5 h-3.5 text-amber-600" />
-            <div className="text-left leading-tight">
+            <div className="text-left leading-tight hidden sm:block">
               <span className="text-[9px] block text-neutral-500 font-medium leading-none">Language</span>
               <span className="font-bold">{language}</span>
             </div>
+            <span className="font-bold sm:hidden text-[10px]">{language.slice(0, 2)}</span>
           </button>
         </div>
       </div>

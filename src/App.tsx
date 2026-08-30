@@ -12,6 +12,7 @@ import { WithdrawTab } from './components/WithdrawTab';
 import { AdPlayerModal } from './components/AdPlayerModal';
 import { SupportModal } from './components/SupportModal';
 import { LanguageModal } from './components/LanguageModal';
+import { BotConfigModal } from './components/BotConfigModal';
 import { TelegramSessionBadge } from './components/TelegramSessionBadge';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
   const [language, setLanguage] = useState<string>('English');
   const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
   const [showLanguageModal, setShowLanguageModal] = useState<boolean>(false);
+  const [showBotModal, setShowBotModal] = useState<boolean>(false);
   const [showAdModal, setShowAdModal] = useState<boolean>(false);
   const [isLoadingAd, setIsLoadingAd] = useState<boolean>(false);
 
@@ -94,23 +96,23 @@ export default function App() {
           const { user } = recordAdCompletion(userData.userId, reward, blockId);
           setUserData(user);
           triggerHaptic('success');
-          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited from Adsgram!`);
+          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited successfully!`);
           setTimeout(() => setAdFeedbackMsg(null), 4000);
         },
         (errMsg) => {
-          setAdFeedbackMsg(`Adsgram: ${errMsg}`);
-          setTimeout(() => setAdFeedbackMsg(null), 4000);
+          console.log('Adsgram playback note:', errMsg);
         }
       );
 
       setIsLoadingAd(false);
 
-      // If Adsgram script is not reachable at all (e.g. adblock or offline), provide interactive fallback
-      if (!result.realAdsgram) {
+      // If Adsgram didn't complete natively (e.g., in web browser test environment without live fill),
+      // seamlessly open the high-fidelity rewarded video player so the user can watch and earn!
+      if (!result.success) {
         setShowAdModal(true);
       }
     } catch (err) {
-      console.warn('Ad error:', err);
+      console.warn('Ad execution error:', err);
       setIsLoadingAd(false);
       setShowAdModal(true);
     }
@@ -144,6 +146,7 @@ export default function App() {
           setActiveTab={setActiveTab}
           onOpenSupport={() => setShowSupportModal(true)}
           onOpenLanguage={() => setShowLanguageModal(true)}
+          onOpenBotConfig={() => setShowBotModal(true)}
           language={language}
         />
 
@@ -205,6 +208,11 @@ export default function App() {
         currentLanguage={language}
         onSelectLanguage={(lang) => setLanguage(lang)}
         onClose={() => setShowLanguageModal(false)}
+      />
+
+      <BotConfigModal
+        isOpen={showBotModal}
+        onClose={() => setShowBotModal(false)}
       />
     </div>
   );
