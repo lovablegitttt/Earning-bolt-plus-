@@ -28,12 +28,12 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl ios-glass border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-5 text-neutral-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-sm rounded-3xl neu-glass-card border border-white p-5 text-neutral-900 shadow-[0_20px_60px_rgba(0,80,200,0.15)]">
         <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <Globe className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 flex items-center justify-center font-bold shadow-[inset_0_1px_1px_rgba(255,255,255,1),2px_2px_6px_rgba(0,80,200,0.08)] border border-white">
+              <Globe className="w-4 h-4 text-blue-600" />
             </div>
             <div>
               <h3 className="font-extrabold text-sm text-neutral-900 leading-tight">
@@ -47,7 +47,7 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({
               triggerHaptic('light');
               onClose();
             }}
-            className="w-7 h-7 rounded-full bg-neutral-100/80 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 transition-colors"
+            className="w-7 h-7 rounded-full neu-light-btn flex items-center justify-center text-neutral-500 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -64,10 +64,10 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({
                   onSelectLanguage(lang.name.split(' ')[0]);
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl border text-xs font-semibold transition-all ${
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/70 text-blue-900 shadow-2xs'
-                    : 'border-neutral-100 bg-white/70 hover:bg-white text-neutral-700'
+                    ? 'border border-blue-500 bg-blue-50/80 text-blue-900 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),2px_4px_10px_rgba(0,102,238,0.12)] ring-2 ring-blue-500/20'
+                    : 'neu-stat-tile hover:bg-neutral-50 text-neutral-700'
                 }`}
               >
                 <div className="flex items-center gap-2.5">

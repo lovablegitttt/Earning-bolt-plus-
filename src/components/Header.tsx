@@ -27,8 +27,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Top Bar with Apple Glass Branding & Controls */}
       <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          {/* iOS App Icon Style Badge */}
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-0.5 shadow-[0_4px_12px_rgba(0,122,255,0.35)] flex items-center justify-center">
+          {/* iOS App Icon Style Badge with Neumorphic Relief */}
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 p-0.5 shadow-[3px_4px_12px_rgba(0,102,238,0.3)] flex items-center justify-center">
             <div className="w-full h-full rounded-[14px] bg-gradient-to-b from-blue-400 to-blue-600 flex items-center justify-center text-white">
               <Zap className="w-5 h-5 fill-white text-white" />
             </div>
@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-extrabold text-lg tracking-tight text-neutral-900">
                 Bolt<span className="text-blue-600">Pay</span>
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/60 shadow-2xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/80 shadow-2xs">
                 PRO
               </span>
             </div>
@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls in Glass Style */}
+        {/* Action Controls in Neumorphic Glass Style */}
         <div className="flex items-center gap-2">
           {/* Customer Support Button */}
           <button
@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
               triggerHaptic('light');
               onOpenSupport();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full ios-glass text-xs font-semibold text-neutral-700 hover:text-blue-600 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full neu-light-btn text-xs font-semibold text-neutral-700 hover:text-blue-600 active:scale-95 transition-all"
           >
             <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
             <span className="text-[11px] font-medium hidden sm:inline">Support</span>
@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
               triggerHaptic('light');
               onOpenLanguage();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full ios-glass text-xs font-semibold text-neutral-700 hover:text-blue-600 active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full neu-light-btn text-xs font-semibold text-neutral-700 hover:text-blue-600 active:scale-95 transition-all"
           >
             <Globe className="w-3.5 h-3.5 text-blue-600" />
             <span className="text-[11px] font-medium">{langText.slice(0, 2).toUpperCase()}</span>
@@ -76,14 +76,14 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Premium iPhone Frosted Glass Hero Card */}
+      {/* Premium Neumorphic + Frosted Glass Hero Card */}
       <div 
         id="hero-balance-card"
-        className="relative overflow-hidden rounded-3xl ios-glass-blue p-5 text-white shadow-[0_16px_36px_rgba(0,102,238,0.35)]"
+        className="relative overflow-hidden rounded-3xl neu-glass-hero p-5 text-white"
       >
-        {/* Apple Light Highlights */}
-        <div className="absolute -top-16 -right-12 w-44 h-44 bg-sky-300/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-10 w-36 h-36 bg-blue-300/20 rounded-full blur-2xl pointer-events-none" />
+        {/* Optical Light Highlights */}
+        <div className="absolute -top-16 -right-12 w-48 h-48 bg-sky-300/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-10 w-40 h-40 bg-blue-300/25 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/15 pointer-events-none rounded-3xl" />
 
         <div className="relative z-10">
@@ -92,17 +92,17 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center gap-1 text-[11px] font-semibold tracking-wider text-blue-100 uppercase">
                 <span>TOTAL AVAILABLE BALANCE</span>
               </div>
-              <div className="text-3xl sm:text-4xl font-black tracking-tight text-white mt-1 flex items-baseline gap-1 drop-shadow-xs">
+              <div className="text-3xl sm:text-4xl font-black tracking-tight text-white mt-1 flex items-baseline gap-1 drop-shadow-sm">
                 ${userData.totalBalance.toFixed(2)}
               </div>
-              <div className="text-[11px] text-blue-100/80 font-medium mt-0.5 flex items-center gap-1">
+              <div className="text-[11px] text-blue-100/90 font-medium mt-0.5 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
                 Instant withdrawals enabled
               </div>
             </div>
 
-            {/* Apple Style User Pill */}
-            <div className="flex items-center gap-2.5 bg-white/15 backdrop-blur-xl px-3 py-1.5 rounded-2xl border border-white/30 shadow-inner">
+            {/* Apple Style User Pill with Neumorphic Glow */}
+            <div className="flex items-center gap-2.5 bg-white/20 backdrop-blur-xl px-3.5 py-1.5 rounded-2xl border border-white/40 shadow-[inset_0_1px_2px_rgba(255,255,255,0.6),0_4px_12px_rgba(0,0,0,0.1)]">
               <div className="relative">
                 {userData.avatarUrl ? (
                   <img
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xs shadow-xs">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white to-blue-50 text-blue-600 flex items-center justify-center font-extrabold text-xs shadow-xs border border-white">
                     {userData.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -130,16 +130,16 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Quick Segmented Nav Control */}
-          <div className="mt-4 pt-3.5 border-t border-white/20 grid grid-cols-3 gap-1.5 bg-black/10 backdrop-blur-md p-1 rounded-2xl">
+          {/* Quick Segmented Nav Control with Inset Well + Raised Pill */}
+          <div className="mt-4 pt-3.5 border-t border-white/20 grid grid-cols-3 gap-1.5 bg-black/15 backdrop-blur-md p-1.5 rounded-2xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)]">
             <button
               onClick={() => {
                 triggerHaptic('light');
                 setActiveTab('ads');
               }}
-              className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
                 activeTab === 'ads'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-[0_3px_10px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,1)]'
                   : 'text-white/80 hover:text-white'
               }`}
             >
@@ -151,9 +151,9 @@ export const Header: React.FC<HeaderProps> = ({
                 triggerHaptic('light');
                 setActiveTab('tasks');
               }}
-              className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
                 activeTab === 'tasks'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-[0_3px_10px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,1)]'
                   : 'text-white/80 hover:text-white'
               }`}
             >
@@ -165,9 +165,9 @@ export const Header: React.FC<HeaderProps> = ({
                 triggerHaptic('light');
                 setActiveTab('invite');
               }}
-              className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
                 activeTab === 'invite'
-                  ? 'bg-white text-blue-700 shadow-sm'
+                  ? 'bg-white text-blue-700 shadow-[0_3px_10px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,1)]'
                   : 'text-white/80 hover:text-white'
               }`}
             >

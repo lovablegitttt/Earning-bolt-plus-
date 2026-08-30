@@ -28,10 +28,10 @@ export const InviteTab: React.FC<InviteTabProps> = ({ userData }) => {
 
   return (
     <div className="space-y-4 pb-28 px-4 animate-in fade-in duration-200">
-      <div className="ios-glass-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="neu-glass-card rounded-3xl p-5">
         {/* Header Icon + Description */}
         <div className="flex items-start gap-3.5 mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-white flex items-center justify-center shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,1),3px_3px_8px_rgba(0,80,200,0.08)]">
             <UserPlus className="w-6 h-6 text-blue-600" />
           </div>
           <div>
@@ -52,14 +52,14 @@ export const InviteTab: React.FC<InviteTabProps> = ({ userData }) => {
           <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-wide">
             Your Personal Invite Link
           </label>
-          <div className="flex items-center justify-between p-2 rounded-2xl border border-neutral-200 bg-white text-xs gap-2 shadow-2xs">
-            <div className="font-mono text-neutral-600 truncate text-[11px] pl-2 select-all">
+          <div className="flex items-center justify-between p-2 rounded-2xl neu-inset-well text-xs gap-2">
+            <div className="font-mono text-neutral-600 truncate text-[11px] pl-2 select-all font-medium">
               {inviteLink}
             </div>
             <button
               id="copy-invite-link-btn"
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs hover:bg-blue-100 active:scale-95 transition-all shrink-0 border border-blue-200/60"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl neu-light-btn text-blue-700 font-bold text-xs hover:text-blue-800 active:scale-95 transition-all shrink-0"
             >
               {copied ? (
                 <>
@@ -80,15 +80,15 @@ export const InviteTab: React.FC<InviteTabProps> = ({ userData }) => {
         <button
           id="share-friends-btn"
           onClick={handleShare}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:brightness-105 font-bold text-sm text-white flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(0,122,255,0.3)] active:scale-[0.99] transition-all mb-5"
+          className="w-full py-4 rounded-2xl neu-glass-btn font-bold text-sm text-white flex items-center justify-center gap-2 mb-5"
         >
           <Send className="w-4 h-4 text-white" />
           <span>Share with Friends</span>
         </button>
 
-        {/* Bottom 2 Stats Boxes */}
+        {/* Bottom 2 Stats Boxes in Neumorphic Tiles */}
         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-100">
-          <div className="rounded-2xl border border-blue-100/80 bg-gradient-to-b from-white to-blue-50/30 p-4 text-left shadow-2xs">
+          <div className="rounded-2xl neu-stat-tile p-4 text-left">
             <span className="text-[10px] font-bold tracking-wider text-blue-800 uppercase block">
               FRIENDS INVITED
             </span>
@@ -97,7 +97,7 @@ export const InviteTab: React.FC<InviteTabProps> = ({ userData }) => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-blue-100/80 bg-gradient-to-b from-white to-blue-50/30 p-4 text-left shadow-2xs">
+          <div className="rounded-2xl neu-stat-tile p-4 text-left">
             <span className="text-[10px] font-bold tracking-wider text-blue-800 uppercase block">
               EARNED FROM INVITES
             </span>

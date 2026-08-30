@@ -77,8 +77,8 @@ export function ensureTelegramLaunchParams(): void {
           isExpanded: true,
           viewportHeight: window.innerHeight,
           viewportStableHeight: window.innerHeight,
-          headerColor: '#d4af37',
-          backgroundColor: '#f6f7f9',
+          headerColor: '#007aff',
+          backgroundColor: '#f0f4f9',
           isClosingConfirmationEnabled: false,
           ready: () => {},
           expand: () => {},
@@ -158,8 +158,8 @@ export function getTelegramUser(): TelegramUser | null {
       try {
         if (typeof tg.ready === 'function') tg.ready();
         if (typeof tg.expand === 'function') tg.expand();
-        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#d4af37');
-        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#f6f7f9');
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#007aff');
+        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#f0f4f9');
       } catch {
         // safe fallback
       }

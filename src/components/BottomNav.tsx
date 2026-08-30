@@ -33,7 +33,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 ios-glass-nav border-t border-white/60 shadow-[0_-8px_32px_rgba(0,122,255,0.08)] pb-[max(env(safe-area-inset-bottom),12px)] pt-2.5">
+    <div className="fixed bottom-0 left-0 right-0 z-40 neu-glass-nav pb-[max(env(safe-area-inset-bottom),12px)] pt-2.5">
       <div className="max-w-md mx-auto px-4 flex items-center justify-around">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
@@ -54,7 +54,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab })
               </div>
               <span className="text-[11px] tracking-tight mt-1 font-semibold">{item.label}</span>
               {isActive && (
-                <div className="absolute -top-1 w-5 h-1 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full shadow-[0_2px_6px_rgba(0,122,255,0.4)]" />
+                <div className="absolute -top-1 w-6 h-1 bg-gradient-to-r from-blue-500 to-sky-400 rounded-full shadow-[0_2px_8px_rgba(0,122,255,0.5)]" />
               )}
             </button>
           );

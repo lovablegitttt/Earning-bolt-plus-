@@ -134,10 +134,10 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
 
   return (
     <div className="space-y-4 pb-28 px-4 animate-in fade-in duration-200">
-      <div className="ios-glass-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="neu-glass-card rounded-3xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 flex items-center justify-center font-bold shadow-[inset_0_1px_1px_rgba(255,255,255,1),2px_2px_6px_rgba(0,80,200,0.08)] border border-white">
               <CheckSquare className="w-4 h-4 text-blue-600" />
             </div>
             <div>
@@ -153,7 +153,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
 
         {/* Feedback / Alert Notice */}
         {taskNotice && (
-          <div className="mb-4 px-3.5 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold animate-in fade-in flex items-center gap-2">
+          <div className="mb-4 px-3.5 py-2.5 rounded-2xl bg-emerald-50/95 border border-emerald-200 text-emerald-800 text-xs font-semibold animate-in fade-in flex items-center gap-2 shadow-2xs">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{taskNotice}</span>
           </div>
@@ -162,11 +162,11 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
         {/* Featured Live Partner Quests */}
         <div
           id="adsgram-task-card"
-          className="mb-4 rounded-3xl border border-blue-200/90 bg-gradient-to-br from-white via-blue-50/40 to-sky-50/60 p-4 shadow-xs"
+          className="mb-4 rounded-3xl border border-blue-200/90 bg-gradient-to-br from-white via-blue-50/40 to-sky-50/60 p-4 shadow-[4px_6px_18px_-2px_rgba(0,80,200,0.07),inset_0_1px_1px_rgba(255,255,255,1)]"
         >
           <div className="flex items-center justify-between gap-2.5 mb-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shrink-0 shadow-[2px_4px_10px_rgba(0,102,238,0.3)]">
                 <Zap className="w-5 h-5 fill-white text-white" />
               </div>
 
@@ -183,7 +183,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
             <button
               onClick={handleRefreshAdsgramTasks}
               disabled={isRefreshingAdsgramTask}
-              className="p-2 rounded-xl bg-white border border-blue-100 text-blue-600 hover:bg-blue-50 active:scale-95 transition-all shadow-2xs"
+              className="p-2 rounded-xl neu-light-btn text-blue-600 hover:bg-blue-50 active:scale-95 transition-all"
               title="Refresh Quests"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshingAdsgramTask ? 'animate-spin' : ''}`} />
@@ -208,11 +208,11 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
               <div
                 key={task.id}
                 id={`task-card-${task.id}`}
-                className="rounded-3xl border border-neutral-200/80 bg-white p-4 shadow-2xs"
+                className="rounded-3xl border border-neutral-200/70 bg-white/90 p-4 shadow-[3px_3px_10px_rgba(0,80,200,0.03),-2px_-2px_8px_rgba(255,255,255,0.9)]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100/60 flex items-center justify-center shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50/80 border border-blue-100/60 flex items-center justify-center shrink-0 shadow-2xs">
                       {getTaskIcon(task.type)}
                     </div>
 
@@ -230,12 +230,12 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
                   <button
                     onClick={() => handleTaskAction(task)}
                     disabled={isCompleted || isVerifying}
-                    className={`px-5 py-2.5 rounded-2xl font-bold text-xs shadow-xs transition-all flex items-center justify-center min-w-[85px] ${
+                    className={`px-5 py-2.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center min-w-[85px] ${
                       isCompleted
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs'
                         : isVerifying
                         ? 'bg-blue-100 text-blue-800 cursor-wait'
-                        : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:brightness-105 active:scale-95 shadow-[0_4px_12px_rgba(0,122,255,0.25)]'
+                        : 'neu-glass-btn text-white'
                     }`}
                   >
                     {isCompleted ? (
@@ -250,13 +250,13 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
                   </button>
                 </div>
 
-                {/* Progress bar */}
+                {/* Progress bar in Neumorphic Debossed Well */}
                 <div className="mt-3.5 pt-2.5 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500 font-medium">
                   <span className="font-semibold text-neutral-600">Completion</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-24 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                    <div className="w-24 h-2 neu-inset-well rounded-full overflow-hidden p-0.5">
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-sky-400 rounded-full transition-all duration-300"
+                        className="h-full bg-gradient-to-r from-blue-500 to-sky-400 rounded-full transition-all duration-300 shadow-xs"
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>

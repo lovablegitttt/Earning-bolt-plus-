@@ -140,10 +140,10 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
 
   return (
     <div className="space-y-4 pb-28 px-4 animate-in fade-in duration-200">
-      <div className="ios-glass-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="neu-glass-card rounded-3xl p-5">
         {/* Title */}
-        <div className="flex items-center gap-2 mb-3.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+        <div className="flex items-center gap-2.5 mb-3.5">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 flex items-center justify-center font-bold shadow-[inset_0_1px_1px_rgba(255,255,255,1),2px_2px_6px_rgba(0,80,200,0.08)] border border-white">
             <Wallet className="w-4 h-4 text-blue-600" />
           </div>
           <div>
@@ -156,7 +156,7 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
           </div>
         </div>
 
-        {/* Payment Methods 3-Column Selector */}
+        {/* Payment Methods 3-Column Selector with Neumorphic Relief */}
         <div className="grid grid-cols-3 gap-2.5 mb-5">
           {(['usdt', 'paypal', 'mobile'] as PaymentMethod[]).map((m) => {
             const isSelected = method === m;
@@ -170,8 +170,8 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
                 }}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/50 shadow-xs ring-2 ring-blue-500/20'
-                    : 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600'
+                    ? 'border-blue-500 bg-blue-50/80 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),2px_4px_12px_rgba(0,102,238,0.15)] ring-2 ring-blue-500/20'
+                    : 'neu-stat-tile hover:bg-neutral-50 text-neutral-600'
                 }`}
               >
                 {getMethodIcon(m)}
@@ -185,7 +185,7 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
 
         {/* Withdrawal Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Amount Field */}
+          {/* Amount Field with Neumorphic Inset Well */}
           <div>
             <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-wide block mb-1">
               Amount (USD)
@@ -196,15 +196,15 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="e.g. 10.00"
-              className="w-full px-4 py-3 rounded-2xl border border-neutral-200 bg-white text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs transition-all"
+              className="w-full px-4 py-3.5 rounded-2xl neu-inset-well text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-neutral-900"
             />
-            <div className="text-[11px] text-neutral-500 font-medium mt-1 pl-1 flex items-center justify-between">
-              <span>Available: <strong className="text-neutral-900">${userData.totalBalance.toFixed(2)}</strong></span>
-              <span className="text-blue-600 font-semibold">Min $10.00</span>
+            <div className="text-[11px] text-neutral-500 font-medium mt-1.5 pl-1 flex items-center justify-between">
+              <span>Available: <strong className="text-neutral-900 font-bold">${userData.totalBalance.toFixed(2)}</strong></span>
+              <span className="text-blue-600 font-bold">Min $10.00</span>
             </div>
           </div>
 
-          {/* Wallet Address / Account Field */}
+          {/* Wallet Address / Account Field with Neumorphic Inset Well */}
           <div>
             <label className="text-[11px] font-bold text-neutral-700 uppercase tracking-wide block mb-1">
               Destination Address / Account
@@ -214,23 +214,23 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder={getAddressPlaceholder()}
-              className="w-full px-4 py-3 rounded-2xl border border-neutral-200 bg-white text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-2xs transition-all"
+              className="w-full px-4 py-3.5 rounded-2xl neu-inset-well text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-neutral-900"
             />
-            <div className="text-[11px] text-neutral-500 font-medium mt-1 pl-1">
+            <div className="text-[11px] text-neutral-500 font-medium mt-1.5 pl-1">
               {getAddressHint()}
             </div>
           </div>
 
           {/* Error / Success Feedback */}
           {errorMsg && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2 shadow-2xs">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 shadow-2xs">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -241,7 +241,7 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
             type="submit"
             id="submit-withdrawal-btn"
             disabled={isSubmitting}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-sm shadow-[0_4px_14px_rgba(0,122,255,0.3)] hover:brightness-105 flex items-center justify-center gap-2 active:scale-[0.99] transition-all disabled:opacity-50"
+            className="w-full py-4 rounded-2xl neu-glass-btn text-white font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
             {isSubmitting ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -257,7 +257,7 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
 
       {/* Withdrawal History Tracker */}
       {userData.withdrawals && userData.withdrawals.length > 0 && (
-        <div className="ios-glass-card rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="neu-glass-card rounded-3xl p-5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-700 mb-3">
             Withdrawal History
           </h3>
@@ -265,7 +265,7 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
             {userData.withdrawals.map((wd: WithdrawalRequest) => (
               <div
                 key={wd.id}
-                className="p-3.5 rounded-2xl bg-white border border-neutral-100 flex items-center justify-between text-xs shadow-2xs"
+                className="p-3.5 rounded-2xl bg-white/90 border border-white flex items-center justify-between text-xs shadow-[2px_2px_8px_rgba(0,70,180,0.04)]"
               >
                 <div>
                   <div className="font-extrabold text-neutral-900 flex items-center gap-1.5 text-sm">
@@ -279,8 +279,8 @@ export const WithdrawTab: React.FC<WithdrawTabProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                  <Clock className="w-3 h-3" />
+                <div className="flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200/80 shadow-2xs">
+                  <Clock className="w-3 h-3 text-blue-600" />
                   <span className="capitalize">{wd.status}</span>
                 </div>
               </div>
