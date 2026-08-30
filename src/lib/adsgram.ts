@@ -26,10 +26,17 @@ declare global {
 }
 
 const STORAGE_BLOCK_KEY = 'bolt_adsgram_block_id';
+const STORAGE_TASK_BLOCK_KEY = 'bolt_adsgram_task_block_id';
 const STORAGE_DEBUG_KEY = 'bolt_adsgram_debug_mode';
 
-// User's configured Adsgram block ID
+// User's configured Adsgram block IDs
 export const DEFAULT_ADSGRAM_BLOCK_ID = 'int-45220';
+export const DEFAULT_ADSGRAM_TASK_BLOCK_ID = 'task-45229';
+
+export const ADSGRAM_BLOCK_PRESETS = [
+  { id: 'int-45220', label: 'Video Ads (int-45220)', type: 'video' as const, reward: 0.30 },
+  { id: 'task-45229', label: 'Reward Tasks (task-45229)', type: 'task' as const, reward: 0.50 },
+];
 
 function getInitialBlockId(): string {
   if (typeof window === 'undefined') return DEFAULT_ADSGRAM_BLOCK_ID;
@@ -41,8 +48,18 @@ function getInitialBlockId(): string {
   return stored;
 }
 
-export function formatAdsgramError(err: unknown): string {
-  if (!err) return 'Ad playback canceled or no inventory';
+function getInitialTaskBlockId(): string {
+  if (typeof window === 'undefined') return DEFAULT_ADSGRAM_TASK_BLOCK_ID;
+  const stored = localStorage.getItem(STORAGE_TASK_BLOCK_KEY);
+  if (!stored) {
+    localStorage.setItem(STORAGE_TASK_BLOCK_KEY, DEFAULT_ADSGRAM_TASK_BLOCK_ID);
+    return DEFAULT_ADSGRAM_TASK_BLOCK_ID;
+  }
+  return stored;
+}
+
+export function formatAdsgramError(err: unknown, blockId?: string): string {
+  if (!err) return 'Playback canceled or no inventory';
   if (typeof err === 'string') return err;
   if (err instanceof Error) return err.message;
   if (typeof err === 'object') {
@@ -63,11 +80,12 @@ export function formatAdsgramError(err: unknown): string {
       // ignore
     }
   }
-  return 'No live ads fill on block int-45220';
+  return `No live fill currently on block ${blockId || 'int-45220 / task-45229'}`;
 }
 
 export class AdsgramService {
   private static blockId: string = getInitialBlockId();
+  private static taskBlockId: string = getInitialTaskBlockId();
 
   private static debugMode: boolean =
     typeof window !== 'undefined' && localStorage.getItem(STORAGE_DEBUG_KEY) !== null
@@ -86,6 +104,17 @@ export class AdsgramService {
     this.controller = null;
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_BLOCK_KEY, this.blockId);
+    }
+  }
+
+  public static getTaskBlockId(): string {
+    return this.taskBlockId;
+  }
+
+  public static setTaskBlockId(id: string) {
+    this.taskBlockId = id.trim() || DEFAULT_ADSGRAM_TASK_BLOCK_ID;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_TASK_BLOCK_KEY, this.taskBlockId);
     }
   }
 
@@ -133,6 +162,25 @@ export class AdsgramService {
   public static async showRewardedAd(
     onReward: () => void,
     onError?: (msg: string) => void,
+    onProgress?: (state: string) => void,
+    customBlockId?: string
+  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
+    return this.showAdOrTask(customBlockId || this.blockId, onReward, onError, onProgress);
+  }
+
+  public static async showRewardTask(
+    onReward: () => void,
+    onError?: (msg: string) => void,
+    onProgress?: (state: string) => void,
+    customTaskBlockId?: string
+  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
+    return this.showAdOrTask(customTaskBlockId || this.taskBlockId, onReward, onError, onProgress);
+  }
+
+  public static async showAdOrTask(
+    targetBlockId: string,
+    onReward: () => void,
+    onError?: (msg: string) => void,
     onProgress?: (state: string) => void
   ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
     if (typeof window === 'undefined') {
@@ -143,31 +191,34 @@ export class AdsgramService {
 
     if (window.Adsgram) {
       try {
-        this.lastLog = `Requesting Adsgram with blockId: "${this.blockId}", debug: ${this.debugMode}...`;
+        const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task');
+        const bannerType = isTaskBlock ? ('RewardTask' as const) : ('RewardedVideo' as const);
+
+        this.lastLog = `Requesting Adsgram with blockId: "${targetBlockId}", isTask: ${isTaskBlock}, debug: ${this.debugMode}...`;
         console.log(this.lastLog);
 
         const controller = window.Adsgram.init({
-          blockId: this.blockId,
+          blockId: targetBlockId,
           debug: this.debugMode,
-          ...(this.debugMode ? { debugBannerType: 'RewardedVideo' as const } : {}),
+          ...(this.debugMode ? { debugBannerType: bannerType } : {}),
         });
 
-        onProgress?.('Adsgram ad loading...');
+        onProgress?.(isTaskBlock ? 'Adsgram task loading...' : 'Adsgram ad loading...');
         const result = await controller.show();
-        this.lastLog = `Adsgram result: done=${result.done}, state=${result.state}, desc="${result.description}"`;
+        this.lastLog = `Adsgram result (${targetBlockId}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
         console.log(this.lastLog);
 
         if (result.done) {
           onReward();
           return { success: true, realAdsgram: true };
         } else {
-          const errDesc = result.description || 'Ad skipped or closed before completion';
+          const errDesc = result.description || 'Closed or skipped before completion';
           onError?.(errDesc);
           return { success: false, realAdsgram: true, error: errDesc };
         }
       } catch (err: unknown) {
-        const errorString = formatAdsgramError(err);
-        this.lastLog = `Adsgram API exception: ${errorString}`;
+        const errorString = formatAdsgramError(err, targetBlockId);
+        this.lastLog = `Adsgram API exception on ${targetBlockId}: ${errorString}`;
         console.warn(this.lastLog);
         onError?.(errorString);
         return { success: false, realAdsgram: true, error: errorString };

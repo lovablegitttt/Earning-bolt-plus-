@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserEarningsData, AdInteraction } from '../types';
 import { Play, AlertCircle, CheckCircle2, ShieldCheck, Settings, ExternalLink, Radio, Zap } from 'lucide-react';
 import { triggerHaptic } from '../lib/telegram';
-import { AdsgramService, DEFAULT_ADSGRAM_BLOCK_ID } from '../lib/adsgram';
+import { AdsgramService, DEFAULT_ADSGRAM_BLOCK_ID, DEFAULT_ADSGRAM_TASK_BLOCK_ID, ADSGRAM_BLOCK_PRESETS } from '../lib/adsgram';
 
 interface AdsTabProps {
   userData: UserEarningsData;
@@ -29,11 +29,19 @@ export const AdsTab: React.FC<AdsTabProps> = ({
   const isLimitReached = userData.todayAdsWatched >= userData.dailyAdsLimit;
   const isSdkAvailable = AdsgramService.isAdsgramAvailable();
 
-  const handleSaveBlockId = () => {
-    AdsgramService.setBlockId(customBlockId.trim() || DEFAULT_ADSGRAM_BLOCK_ID);
+  const handleSaveBlockId = (blockToSave?: string) => {
+    const id = (blockToSave || customBlockId).trim() || DEFAULT_ADSGRAM_BLOCK_ID;
+    setCustomBlockId(id);
+    AdsgramService.setBlockId(id);
     AdsgramService.setDebugMode(isDebug);
     setShowConfig(false);
     triggerHaptic('success');
+  };
+
+  const handleSelectPreset = (presetId: string) => {
+    setCustomBlockId(presetId);
+    AdsgramService.setBlockId(presetId);
+    triggerHaptic('medium');
   };
 
   const handleToggleDebug = (val: boolean) => {
@@ -145,28 +153,54 @@ export const AdsTab: React.FC<AdsTabProps> = ({
               </div>
             </div>
 
-            {/* Block ID Input */}
+            {/* Block ID Presets & Input */}
             <div>
-              <label className="text-[11px] font-bold text-neutral-800 block mb-1">
-                Adsgram Block ID:
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[11px] font-bold text-neutral-800">
+                  Adsgram Block ID:
+                </label>
+                <span className="text-[10px] text-amber-800 font-semibold">Active: {AdsgramService.getBlockId()}</span>
+              </div>
+
+              {/* Preset Chips */}
+              <div className="grid grid-cols-2 gap-1.5 mb-2">
+                {ADSGRAM_BLOCK_PRESETS.map((preset) => {
+                  const isSelected = customBlockId === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset.id)}
+                      className={`px-2.5 py-1.5 rounded-lg text-left text-[10px] font-medium border transition-all ${
+                        isSelected
+                          ? 'bg-neutral-900 text-white border-neutral-900 font-bold shadow-xs'
+                          : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50'
+                      }`}
+                    >
+                      <div className="truncate font-semibold">{preset.label}</div>
+                      <div className="text-[9px] opacity-80">Reward: +${preset.reward.toFixed(2)}</div>
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={customBlockId}
                   onChange={(e) => setCustomBlockId(e.target.value)}
-                  placeholder="e.g. int-5441 or your block ID"
+                  placeholder="e.g. int-45220 or task-45229"
                   className="flex-1 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
                 <button
-                  onClick={handleSaveBlockId}
+                  onClick={() => handleSaveBlockId(customBlockId)}
                   className="px-3.5 py-1.5 bg-neutral-900 text-white font-bold text-xs rounded-lg hover:bg-neutral-800"
                 >
                   Apply
                 </button>
               </div>
               <p className="text-[10px] text-amber-800/80 mt-1">
-                Create or manage your Block IDs in the Adsgram Telegram Bot / Web Dashboard at adsgram.ai
+                Supports both <b>int-45220</b> (Video Ads) and <b>task-45229</b> (Reward Tasks).
               </p>
             </div>
           </div>

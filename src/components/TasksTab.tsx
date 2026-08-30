@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { UserEarningsData, TaskItem } from '../types';
-import { Megaphone, Bot, Youtube, CheckCircle, ExternalLink, Sparkles } from 'lucide-react';
+import { Megaphone, Bot, Youtube, CheckCircle, ExternalLink, Sparkles, Zap, ShieldCheck } from 'lucide-react';
 import { triggerHaptic, openExternalLink } from '../lib/telegram';
 import { INITIAL_TASKS, saveUserData } from '../lib/storage';
+import { AdsgramService, DEFAULT_ADSGRAM_TASK_BLOCK_ID } from '../lib/adsgram';
 
 interface TasksTabProps {
   userData: UserEarningsData;
@@ -18,6 +19,47 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
   });
 
   const [activeVerifyingId, setActiveVerifyingId] = useState<string | null>(null);
+  const [adsgramTaskLoading, setAdsgramTaskLoading] = useState(false);
+  const [taskNotice, setTaskNotice] = useState<string | null>(null);
+
+  const handleLaunchAdsgramTaskWall = async () => {
+    setAdsgramTaskLoading(true);
+    setTaskNotice(null);
+    triggerHaptic('medium');
+
+    try {
+      const result = await AdsgramService.showRewardTask(
+        () => {
+          // On task completion reward
+          const taskReward = 0.50;
+          const newBalance = Number((userData.totalBalance + taskReward).toFixed(2));
+          const updatedUser: UserEarningsData = {
+            ...userData,
+            totalBalance: newBalance,
+          };
+          saveUserData(updatedUser);
+          triggerHaptic('success');
+          setTaskNotice(`+$${taskReward.toFixed(2)} rewarded from Adsgram Tasks!`);
+          setTimeout(() => setTaskNotice(null), 5000);
+        },
+        (errMsg) => {
+          setTaskNotice(errMsg || 'Adsgram task was closed or not completed');
+          setTimeout(() => setTaskNotice(null), 5000);
+        }
+      );
+
+      if (!result.success && result.error) {
+        setTaskNotice(result.error);
+        setTimeout(() => setTaskNotice(null), 5000);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error launching Adsgram task';
+      setTaskNotice(msg);
+      setTimeout(() => setTaskNotice(null), 5000);
+    } finally {
+      setAdsgramTaskLoading(false);
+    }
+  };
 
   const getTaskIcon = (type: TaskItem['type']) => {
     switch (type) {
@@ -97,6 +139,58 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
           <h2 className="text-base font-bold text-neutral-900 tracking-tight">
             Complete Tasks & Earn Rewards
           </h2>
+        </div>
+
+        {/* Feedback / Alert Notice */}
+        {taskNotice && (
+          <div className="mb-3 px-3.5 py-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-medium animate-in fade-in flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>{taskNotice}</span>
+          </div>
+        )}
+
+        {/* Featured Adsgram Sponsored Task Wall (task-45229) */}
+        <div
+          id="adsgram-task-card"
+          className="mb-4 rounded-2xl border-2 border-amber-400/90 bg-gradient-to-br from-[#fffdfa] via-[#fffbf0] to-[#fbf4de] p-3.5 shadow-sm"
+        >
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Zap className="w-5 h-5 fill-white" />
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-neutral-900 leading-tight">
+                    Adsgram Tasks Wall
+                  </h3>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-950 font-bold">
+                    {DEFAULT_ADSGRAM_TASK_BLOCK_ID}
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-600 font-medium mt-0.5">
+                  Complete partner quests & tasks
+                </p>
+              </div>
+            </div>
+
+            {/* Launch Adsgram Task Wall Button */}
+            <div className="flex flex-col items-end gap-1">
+              <button
+                onClick={handleLaunchAdsgramTaskWall}
+                disabled={adsgramTaskLoading}
+                className="px-4 py-2 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center min-w-[85px] bg-gradient-to-b from-[#2a2b33] to-[#14151a] text-white hover:brightness-110 active:scale-95 border border-neutral-700 disabled:opacity-50"
+              >
+                {adsgramTaskLoading ? (
+                  <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <span>Launch</span>
+                )}
+              </button>
+              <span className="text-[10px] font-black text-amber-700">+$0.50</span>
+            </div>
+          </div>
         </div>
 
         {/* Task Cards List matching Screenshot 2 */}
