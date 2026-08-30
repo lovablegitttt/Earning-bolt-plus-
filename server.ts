@@ -49,7 +49,7 @@ function buildWelcomePayload(chatId: string | number, firstName: string, appUrl:
 
   const messageText = `⚡️ <b>Welcome to PayPlus Bolt Earning, ${firstName || "Valued User"}!</b> ⚡️
 
-Earn real rewards daily with Adsgram Video Ads, Partner Tasks (task-45229), and instant withdrawals.
+Earn real rewards daily with Adsgram Video Ads (int-45220), Partner Tasks (task-45229), and instant withdrawals.
 
 💰 <b>Earning Breakdown:</b>
 • <b>Partner Tasks:</b> $0.50 per completed task (task-45229)
@@ -125,7 +125,7 @@ async function handleTelegramUpdate(update: any) {
     } else if (text.startsWith("/tasks") || text.startsWith("/task") || text.toLowerCase() === "tasks" || text.toLowerCase() === "task") {
       await callTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `🎯 <b>Adsgram Reward Tasks (task-45229)</b>\n\nComplete partner tasks, channels subscriptions, and app tests to earn <b>$0.50</b> for every completed offer!\n\n⚡️ <b>Highlights:</b>\n• Block ID: <code>task-45229</code>\n• Reward: <b>+$0.50</b> instant credit\n• Instant verification and balance sync\n\n👇 <b>Tap below to open the Tasks Wall:</b>`,
+        text: `🎯 <b>Adsgram Reward Tasks (task-45229)</b>\n\nComplete partner tasks, channel subscriptions, and app tests to earn <b>$0.50</b> for every completed offer!\n\n⚡️ <b>Highlights:</b>\n• Block ID: <code>task-45229</code>\n• Reward: <b>+$0.50</b> instant credit\n• Instant verification and balance sync\n\n👇 <b>Tap below to open the Tasks Wall:</b>`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
@@ -151,7 +151,7 @@ async function handleTelegramUpdate(update: any) {
     } else if (text.startsWith("/ads") || text.startsWith("/ad") || text.startsWith("/video") || text.toLowerCase() === "ads" || text.toLowerCase() === "video") {
       await callTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `🎬 <b>Adsgram Rewarded Video Ads (int-45220)</b>\n\nWatch sponsored video ads and get <b>$0.30</b> credited directly to your balance!\n\n⚡️ <b>Highlights:</b>\n• Block ID: <code>int-45220</code>\n• Reward: <b>+$0.30</b> per video\n• Daily Limit: 10 videos ($3.00/day)\n\n👇 <b>Tap below to start watching:</b>`,
+        text: `🎬 <b>Adsgram Rewarded Video Ads (int-45220)</b>\n\nWatch sponsored video ads powered by Adsgram and get <b>$0.30</b> credited directly to your balance!\n\n⚡️ <b>Highlights:</b>\n• Block ID: <code>int-45220</code>\n• Reward: <b>+$0.30</b> per video\n• Cooling Period: 1 minute between ads\n• Daily Limit: 15 videos ($4.50/day)\n\n👇 <b>Tap below to start watching:</b>`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
@@ -177,7 +177,7 @@ async function handleTelegramUpdate(update: any) {
     } else if (text.startsWith("/balance") || text.startsWith("/stats") || text.toLowerCase() === "balance") {
       await callTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `📊 <b>Your PayPlus Bolt Account:</b>\n\nClick below to access your live balance, watched Ads, completed Tasks (task-45229), and pending withdrawals.`,
+        text: `📊 <b>Your PayPlus Bolt Account:</b>\n\nClick below to access your live balance, watched Adsgram ads, completed tasks (task-45229), and pending withdrawals.`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
@@ -203,7 +203,7 @@ async function handleTelegramUpdate(update: any) {
     } else if (text.startsWith("/help") || text.toLowerCase() === "help") {
       await callTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `ℹ️ <b>PayPlus Bolt Help & Guidelines:</b>\n\n• <b>Tasks (task-45229):</b> Complete sponsor tasks to earn $0.50\n• <b>Video Ads (int-45220):</b> Watch videos completely to earn $0.30\n• <b>Withdrawals:</b> Processed via USDT (TRC20), PayPal, and Mobile Top-Up\n• <b>Support:</b> Contact our team anytime if you need help.`,
+        text: `ℹ️ <b>PayPlus Bolt Help & Guidelines:</b>\n\n• <b>Tasks (task-45229):</b> Complete sponsor tasks to earn $0.50\n• <b>Video Ads (int-45220):</b> Watch videos completely to earn $0.30 (1m cooldown)\n• <b>Withdrawals:</b> Processed via USDT (TRC20), PayPal, and Mobile Top-Up\n• <b>Support:</b> Contact our team anytime if you need help.`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
@@ -253,7 +253,7 @@ async function startTelegramLongPolling() {
       commands: [
         { command: "start", description: "Start the bot & open earning app" },
         { command: "tasks", description: "Complete partner tasks (task-45229, $0.50)" },
-        { command: "ads", description: "Watch rewarded video ads ($0.30)" },
+        { command: "ads", description: "Watch rewarded video ads (int-45220, $0.30)" },
         { command: "earn", description: "Open PayPlus Bolt Mini App" },
         { command: "balance", description: "Check your earning stats & balance" },
         { command: "help", description: "Get support & rules" },
@@ -339,7 +339,7 @@ app.post("/api/bot/setup-webhook", async (req, res) => {
       commands: [
         { command: "start", description: "Start the bot & open earning app" },
         { command: "tasks", description: "Complete partner tasks (task-45229, $0.50)" },
-        { command: "ads", description: "Watch rewarded video ads ($0.30)" },
+        { command: "ads", description: "Watch rewarded video ads (int-45220, $0.30)" },
         { command: "earn", description: "Open PayPlus Bolt Mini App" },
         { command: "balance", description: "Check your earning stats & balance" },
         { command: "help", description: "Get support & rules" },

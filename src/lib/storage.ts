@@ -107,7 +107,7 @@ function createDefaultUserData(userId: string, name: string): UserEarningsData {
         adProvider: 'Adsgram',
         status: 'completed',
         txHash: '0x' + Math.random().toString(16).substring(2, 10).toUpperCase(),
-        blockId: '1234',
+        blockId: 'int-45220',
       }
     ],
     withdrawals: [],
@@ -118,7 +118,7 @@ function createDefaultUserData(userId: string, name: string): UserEarningsData {
 export function recordAdCompletion(
   userId: string,
   reward: number = 0.30,
-  blockId: string = '1234'
+  blockId: string = 'int-45220'
 ): { user: UserEarningsData; interaction: AdInteraction } {
   const current = getStoredUserData(userId);
 

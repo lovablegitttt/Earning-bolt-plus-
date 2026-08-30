@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { TabType, UserEarningsData, TaskItem } from './types';
 import { getTelegramUser, getStartParam, triggerHaptic, ensureTelegramLaunchParams } from './lib/telegram';
 import { getStoredUserData, recordAdCompletion, saveUserData } from './lib/storage';
-import { AdsgramService } from './lib/adsgram';
+import { AdsgramService, AD_COOLDOWN_SECONDS } from './lib/adsgram';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { AdsTab } from './components/AdsTab';
@@ -104,6 +104,18 @@ export default function App() {
       return;
     }
 
+    // 1-minute cooldown check
+    if (userData.lastAdTimestamp) {
+      const elapsed = Date.now() - userData.lastAdTimestamp;
+      const cooldownMs = AD_COOLDOWN_SECONDS * 1000;
+      if (elapsed < cooldownMs) {
+        const remainingSecs = Math.ceil((cooldownMs - elapsed) / 1000);
+        setAdFeedbackMsg(`Please wait ${remainingSecs}s cooling period before watching next ad.`);
+        setTimeout(() => setAdFeedbackMsg(null), 3500);
+        return;
+      }
+    }
+
     setIsLoadingAd(true);
     setAdFeedbackMsg(null);
     triggerHaptic('medium');
@@ -117,13 +129,17 @@ export default function App() {
           const { user } = recordAdCompletion(userData.userId, reward, blockId);
           setUserData(user);
           triggerHaptic('success');
-          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited from Adsgram!`);
+          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited from Adsgram! (1m cooldown active)`);
           setTimeout(() => setAdFeedbackMsg(null), 4500);
         },
         (errMsg) => {
-          setAdFeedbackMsg(errMsg || 'Adsgram ad was closed or skipped before completion');
+          setAdFeedbackMsg(errMsg || 'Adsgram ad was closed before completion');
           setTimeout(() => setAdFeedbackMsg(null), 5000);
-        }
+        },
+        (state) => {
+          setAdFeedbackMsg(state);
+        },
+        blockId
       );
 
       if (!result.success && result.error) {
@@ -137,7 +153,7 @@ export default function App() {
     } finally {
       setIsLoadingAd(false);
     }
-  }, [userData.adsRewardPerView, userData.dailyAdsLimit, userData.todayAdsWatched, userData.userId]);
+  }, [userData.adsRewardPerView, userData.dailyAdsLimit, userData.lastAdTimestamp, userData.todayAdsWatched, userData.userId]);
 
   const handleTaskCompleted = (task: TaskItem) => {
     const current = getStoredUserData(userData.userId);
@@ -150,7 +166,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f6f7f9] text-neutral-900 font-sans antialiased flex flex-col justify-between max-w-md mx-auto relative shadow-2xl overflow-x-hidden">
-      {/* Top Header matching Screenshots 1-4 */}
+      {/* Top Header */}
       <div>
         <Header
           userData={userData}
@@ -158,18 +174,13 @@ export default function App() {
           setActiveTab={setActiveTab}
           onOpenSupport={() => setShowSupportModal(true)}
           onOpenLanguage={() => setShowLanguageModal(true)}
-          onOpenBotConfig={() => setShowBotModal(true)}
-          language={language}
+          onOpenBotModal={() => setShowBotModal(true)}
         />
 
-        {/* Telegram Session Authenticity Badge */}
-        <TelegramSessionBadge
-          userData={userData}
-          onUserUpdated={(updated) => setUserData(updated)}
-        />
+        <TelegramSessionBadge onOpenBotModal={() => setShowBotModal(true)} />
 
-        {/* Active Tab View */}
-        <main className="mt-1">
+        {/* Dynamic Content Views */}
+        <main className="mt-2">
           {activeTab === 'ads' && (
             <AdsTab
               userData={userData}
@@ -199,22 +210,27 @@ export default function App() {
         </main>
       </div>
 
-      {/* Floating Bottom Nav */}
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Bottom Sticky Navigation */}
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
-      {/* Modals */}
+      {/* Support Modal */}
       <SupportModal
         isOpen={showSupportModal}
         onClose={() => setShowSupportModal(false)}
       />
 
+      {/* Language Selector Modal */}
       <LanguageModal
         isOpen={showLanguageModal}
-        currentLanguage={language}
-        onSelectLanguage={(lang) => setLanguage(lang)}
         onClose={() => setShowLanguageModal(false)}
+        selectedLanguage={language}
+        onSelectLanguage={(lang) => setLanguage(lang)}
       />
 
+      {/* Telegram Bot Live Status & Webhook Modal */}
       <BotConfigModal
         isOpen={showBotModal}
         onClose={() => setShowBotModal(false)}
