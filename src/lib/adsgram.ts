@@ -13,7 +13,7 @@ export interface AdsgramController {
 export interface AdsgramInitParams {
   blockId: string;
   debug?: boolean;
-  debugBannerType?: 'FullscreenMedia' | 'Rewarded';
+  debugBannerType?: 'RewardedVideo' | 'FullscreenMedia' | 'RewardTask' | 'AdsgramFullscreen' | 'AdsgramInline';
   val?: string;
 }
 
@@ -28,18 +28,26 @@ declare global {
 const STORAGE_BLOCK_KEY = 'bolt_adsgram_block_id';
 const STORAGE_DEBUG_KEY = 'bolt_adsgram_debug_mode';
 
-// Standard Adsgram test block ID or customizable publisher ID
-export const DEFAULT_ADSGRAM_BLOCK_ID = 'int-5441';
+// User's configured Adsgram block ID
+export const DEFAULT_ADSGRAM_BLOCK_ID = 'int-45220';
+
+function getInitialBlockId(): string {
+  if (typeof window === 'undefined') return DEFAULT_ADSGRAM_BLOCK_ID;
+  const stored = localStorage.getItem(STORAGE_BLOCK_KEY);
+  if (!stored || stored === 'int-5441' || stored === '1234') {
+    localStorage.setItem(STORAGE_BLOCK_KEY, DEFAULT_ADSGRAM_BLOCK_ID);
+    return DEFAULT_ADSGRAM_BLOCK_ID;
+  }
+  return stored;
+}
 
 export class AdsgramService {
-  private static blockId: string =
-    (typeof window !== 'undefined' && localStorage.getItem(STORAGE_BLOCK_KEY)) ||
-    DEFAULT_ADSGRAM_BLOCK_ID;
+  private static blockId: string = getInitialBlockId();
 
   private static debugMode: boolean =
-    typeof window !== 'undefined'
-      ? localStorage.getItem(STORAGE_DEBUG_KEY) !== 'false'
-      : true;
+    typeof window !== 'undefined' && localStorage.getItem(STORAGE_DEBUG_KEY) !== null
+      ? localStorage.getItem(STORAGE_DEBUG_KEY) === 'true'
+      : false;
 
   private static controller: AdsgramController | null = null;
   private static lastLog: string = 'Adsgram SDK initialized';
@@ -117,7 +125,7 @@ export class AdsgramService {
         const controller = window.Adsgram.init({
           blockId: this.blockId,
           debug: this.debugMode,
-          debugBannerType: 'Rewarded',
+          ...(this.debugMode ? { debugBannerType: 'RewardedVideo' as const } : {}),
         });
 
         onProgress?.('Adsgram ad loading...');
