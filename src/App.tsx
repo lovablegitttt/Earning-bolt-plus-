@@ -9,7 +9,6 @@ import { AdsTab } from './components/AdsTab';
 import { TasksTab } from './components/TasksTab';
 import { InviteTab } from './components/InviteTab';
 import { WithdrawTab } from './components/WithdrawTab';
-import { AdPlayerModal } from './components/AdPlayerModal';
 import { SupportModal } from './components/SupportModal';
 import { LanguageModal } from './components/LanguageModal';
 import { BotConfigModal } from './components/BotConfigModal';
@@ -21,7 +20,6 @@ export default function App() {
   const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
   const [showLanguageModal, setShowLanguageModal] = useState<boolean>(false);
   const [showBotModal, setShowBotModal] = useState<boolean>(false);
-  const [showAdModal, setShowAdModal] = useState<boolean>(false);
   const [isLoadingAd, setIsLoadingAd] = useState<boolean>(false);
 
   // Authenticate & Load User
@@ -79,10 +77,16 @@ export default function App() {
     return () => window.removeEventListener('bolt_earnings_updated', handleUpdate);
   }, [userData.userId]);
 
-  // Handle Watch Ad Click
+  // Handle Watch Real Adsgram Ad Click
   const [adFeedbackMsg, setAdFeedbackMsg] = useState<string | null>(null);
 
   const handleWatchAd = useCallback(async () => {
+    if (userData.todayAdsWatched >= userData.dailyAdsLimit) {
+      setAdFeedbackMsg('Daily limit reached. Check back tomorrow!');
+      setTimeout(() => setAdFeedbackMsg(null), 3000);
+      return;
+    }
+
     setIsLoadingAd(true);
     setAdFeedbackMsg(null);
     triggerHaptic('medium');
@@ -96,36 +100,27 @@ export default function App() {
           const { user } = recordAdCompletion(userData.userId, reward, blockId);
           setUserData(user);
           triggerHaptic('success');
-          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited successfully!`);
-          setTimeout(() => setAdFeedbackMsg(null), 4000);
+          setAdFeedbackMsg(`+$${reward.toFixed(2)} credited from Adsgram!`);
+          setTimeout(() => setAdFeedbackMsg(null), 4500);
         },
         (errMsg) => {
-          console.log('Adsgram playback note:', errMsg);
+          setAdFeedbackMsg(errMsg || 'Adsgram ad was closed or skipped before completion');
+          setTimeout(() => setAdFeedbackMsg(null), 5000);
         }
       );
 
-      setIsLoadingAd(false);
-
-      // If Adsgram didn't complete natively (e.g., in web browser test environment without live fill),
-      // seamlessly open the high-fidelity rewarded video player so the user can watch and earn!
-      if (!result.success) {
-        setShowAdModal(true);
+      if (!result.success && result.error) {
+        setAdFeedbackMsg(result.error);
+        setTimeout(() => setAdFeedbackMsg(null), 5000);
       }
-    } catch (err) {
-      console.warn('Ad execution error:', err);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Adsgram playback issue';
+      setAdFeedbackMsg(errorMsg);
+      setTimeout(() => setAdFeedbackMsg(null), 5000);
+    } finally {
       setIsLoadingAd(false);
-      setShowAdModal(true);
     }
-  }, [userData.adsRewardPerView, userData.userId]);
-
-  const handleAdModalCompleted = useCallback(() => {
-    setShowAdModal(false);
-    const reward = userData.adsRewardPerView || 0.30;
-    const blockId = AdsgramService.getBlockId();
-    const { user } = recordAdCompletion(userData.userId, reward, blockId);
-    setUserData(user);
-    triggerHaptic('success');
-  }, [userData.adsRewardPerView, userData.userId]);
+  }, [userData.adsRewardPerView, userData.dailyAdsLimit, userData.todayAdsWatched, userData.userId]);
 
   const handleTaskCompleted = (task: TaskItem) => {
     const current = getStoredUserData(userData.userId);
@@ -191,13 +186,6 @@ export default function App() {
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Modals */}
-      <AdPlayerModal
-        isOpen={showAdModal}
-        rewardAmount={userData.adsRewardPerView || 0.30}
-        onAdCompleted={handleAdModalCompleted}
-        onClose={() => setShowAdModal(false)}
-      />
-
       <SupportModal
         isOpen={showSupportModal}
         onClose={() => setShowSupportModal(false)}

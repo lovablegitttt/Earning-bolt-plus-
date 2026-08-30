@@ -134,12 +134,12 @@ export class AdsgramService {
     onReward: () => void,
     onError?: (msg: string) => void,
     onProgress?: (state: string) => void
-  ): Promise<{ success: boolean; realAdsgram: boolean; fallbackNeeded?: boolean; error?: string }> {
+  ): Promise<{ success: boolean; realAdsgram: boolean; error?: string }> {
     if (typeof window === 'undefined') {
-      return { success: false, realAdsgram: false, fallbackNeeded: true, error: 'Window not available' };
+      return { success: false, realAdsgram: false, error: 'Window not available' };
     }
 
-    await this.ensureScriptLoaded();
+    const loaded = await this.ensureScriptLoaded();
 
     if (window.Adsgram) {
       try {
@@ -163,19 +163,21 @@ export class AdsgramService {
         } else {
           const errDesc = result.description || 'Ad skipped or closed before completion';
           onError?.(errDesc);
-          return { success: false, realAdsgram: true, fallbackNeeded: true, error: errDesc };
+          return { success: false, realAdsgram: true, error: errDesc };
         }
       } catch (err: unknown) {
         const errorString = formatAdsgramError(err);
         this.lastLog = `Adsgram API exception: ${errorString}`;
         console.warn(this.lastLog);
         onError?.(errorString);
-        return { success: false, realAdsgram: true, fallbackNeeded: true, error: errorString };
+        return { success: false, realAdsgram: true, error: errorString };
       }
     }
 
     this.lastLog = 'Adsgram SDK script not available on window';
-    return { success: false, realAdsgram: false, fallbackNeeded: true, error: 'Adsgram script loading' };
+    const msg = 'Adsgram script is initializing, please tap again in a moment.';
+    onError?.(msg);
+    return { success: false, realAdsgram: false, error: msg };
   }
 }
 
