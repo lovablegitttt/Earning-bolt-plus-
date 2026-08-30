@@ -31,12 +31,39 @@ const STORAGE_DEBUG_KEY = 'bolt_adsgram_debug_mode';
 
 // User's configured Adsgram block IDs
 export const DEFAULT_ADSGRAM_BLOCK_ID = 'int-45220';
-export const DEFAULT_ADSGRAM_TASK_BLOCK_ID = 'task-45229';
+export const DEFAULT_ADSGRAM_TASK_BLOCK_ID = '45229';
 
 export const ADSGRAM_BLOCK_PRESETS = [
   { id: 'int-45220', label: 'Video Ads (int-45220)', type: 'video' as const, reward: 0.30 },
-  { id: 'task-45229', label: 'Reward Tasks (task-45229)', type: 'task' as const, reward: 0.50 },
+  { id: '45229', label: 'Tasks (45229)', type: 'task' as const, reward: 0.50 },
 ];
+
+/**
+ * Sanitizes any block ID into what Adsgram's SDK strictly requires:
+ * Must be pure numeric string (e.g. "45229") or start with "int-" followed by digits (e.g. "int-45220")
+ */
+export function sanitizeAdsgramBlockId(rawId: string): string {
+  if (!rawId) return DEFAULT_ADSGRAM_BLOCK_ID;
+  const trimmed = rawId.trim();
+
+  // Valid int-XXXX format
+  if (/^int-\d+$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Pure numeric string e.g. "45229"
+  if (/^\d+$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // If passed with prefix like task-45229 or banner-45229, extract the digits
+  const match = trimmed.match(/\d+/);
+  if (match) {
+    return match[0];
+  }
+
+  return DEFAULT_ADSGRAM_BLOCK_ID;
+}
 
 function getInitialBlockId(): string {
   if (typeof window === 'undefined') return DEFAULT_ADSGRAM_BLOCK_ID;
@@ -191,21 +218,20 @@ export class AdsgramService {
 
     if (window.Adsgram) {
       try {
-        const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task');
-        const bannerType = isTaskBlock ? ('RewardTask' as const) : ('RewardedVideo' as const);
+        const sanitizedBlock = sanitizeAdsgramBlockId(targetBlockId);
+        const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task') || sanitizedBlock === '45229';
 
-        this.lastLog = `Requesting Adsgram with blockId: "${targetBlockId}", isTask: ${isTaskBlock}, debug: ${this.debugMode}...`;
+        this.lastLog = `Requesting Adsgram with blockId: "${sanitizedBlock}" (original: "${targetBlockId}"), debug: ${this.debugMode}...`;
         console.log(this.lastLog);
 
         const controller = window.Adsgram.init({
-          blockId: targetBlockId,
+          blockId: sanitizedBlock,
           debug: this.debugMode,
-          ...(this.debugMode ? { debugBannerType: bannerType } : {}),
         });
 
         onProgress?.(isTaskBlock ? 'Adsgram task loading...' : 'Adsgram ad loading...');
         const result = await controller.show();
-        this.lastLog = `Adsgram result (${targetBlockId}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
+        this.lastLog = `Adsgram result (${sanitizedBlock}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
         console.log(this.lastLog);
 
         if (result.done) {

@@ -166,7 +166,7 @@ export const TasksTab: React.FC<TasksTabProps> = ({ userData, onTaskCompleted })
                     Adsgram Tasks Wall
                   </h3>
                   <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-950 font-bold">
-                    {DEFAULT_ADSGRAM_TASK_BLOCK_ID}
+                    ID: 45229
                   </span>
                 </div>
                 <p className="text-xs text-neutral-600 font-medium mt-0.5">
