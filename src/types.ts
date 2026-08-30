@@ -6,6 +6,7 @@ export interface TelegramUser {
   photo_url?: string;
   language_code?: string;
   is_premium?: boolean;
+  allows_write_to_pm?: boolean;
 }
 
 export interface AdInteraction {

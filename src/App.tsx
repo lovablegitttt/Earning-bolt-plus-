@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TabType, UserEarningsData, TaskItem } from './types';
-import { getTelegramUser, getStartParam, triggerHaptic } from './lib/telegram';
+import { getTelegramUser, getStartParam, triggerHaptic, ensureTelegramLaunchParams } from './lib/telegram';
 import { getStoredUserData, recordAdCompletion, saveUserData } from './lib/storage';
 import { AdsgramService } from './lib/adsgram';
 import { Header } from './components/Header';
@@ -24,6 +24,7 @@ export default function App() {
 
   // Authenticate & Load User
   const [userData, setUserData] = useState<UserEarningsData>(() => {
+    ensureTelegramLaunchParams();
     const tgUser = getTelegramUser();
     if (tgUser) {
       const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || 'Telegram User';

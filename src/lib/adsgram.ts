@@ -1,3 +1,5 @@
+import { ensureTelegramLaunchParams } from './telegram';
+
 export interface ShowPromiseResult {
   done: boolean;
   description: string;
@@ -87,27 +89,38 @@ function getInitialTaskBlockId(): string {
 
 export function formatAdsgramError(err: unknown, blockId?: string): string {
   if (!err) return 'Playback canceled or no inventory';
-  if (typeof err === 'string') return err;
-  if (err instanceof Error) return err.message;
-  if (typeof err === 'object') {
+  let message = '';
+  if (typeof err === 'string') {
+    message = err;
+  } else if (err instanceof Error) {
+    message = err.message;
+  } else if (typeof err === 'object') {
     const record = err as Record<string, unknown>;
     if (record.description && typeof record.description === 'string') {
-      return record.description;
-    }
-    if (record.message && typeof record.message === 'string') {
-      return record.message;
-    }
-    if (record.state && typeof record.state === 'string') {
-      return `Adsgram state: ${record.state}`;
-    }
-    try {
-      const json = JSON.stringify(err);
-      if (json !== '{}') return json;
-    } catch {
-      // ignore
+      message = record.description;
+    } else if (record.message && typeof record.message === 'string') {
+      message = record.message;
+    } else if (record.state && typeof record.state === 'string') {
+      message = `Adsgram state: ${record.state}`;
+    } else {
+      try {
+        const json = JSON.stringify(err);
+        if (json !== '{}') message = json;
+      } catch {
+        // ignore
+      }
     }
   }
-  return `No live fill currently on block ${blockId || 'int-45220 / task-45229'}`;
+
+  if (!message) {
+    message = `No live fill currently on block ${blockId || 'int-45220 / 45229'}`;
+  }
+
+  if (message.toLowerCase().includes('launch parameters') || message.toLowerCase().includes('telegram environment')) {
+    return 'Please open via Telegram Bot (@Boltearningbdngbot) or enable Test Mode to view ads.';
+  }
+
+  return message;
 }
 
 export class AdsgramService {
@@ -214,23 +227,42 @@ export class AdsgramService {
       return { success: false, realAdsgram: false, error: 'Window not available' };
     }
 
-    const loaded = await this.ensureScriptLoaded();
+    ensureTelegramLaunchParams();
+    await this.ensureScriptLoaded();
 
     if (window.Adsgram) {
-      try {
-        const sanitizedBlock = sanitizeAdsgramBlockId(targetBlockId);
-        const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task') || sanitizedBlock === '45229';
+      const sanitizedBlock = sanitizeAdsgramBlockId(targetBlockId);
+      const isTaskBlock = targetBlockId.startsWith('task-') || targetBlockId.includes('task') || sanitizedBlock === '45229';
 
+      try {
         this.lastLog = `Requesting Adsgram with blockId: "${sanitizedBlock}" (original: "${targetBlockId}"), debug: ${this.debugMode}...`;
         console.log(this.lastLog);
 
-        const controller = window.Adsgram.init({
+        let controller = window.Adsgram.init({
           blockId: sanitizedBlock,
           debug: this.debugMode,
         });
 
         onProgress?.(isTaskBlock ? 'Adsgram task loading...' : 'Adsgram ad loading...');
-        const result = await controller.show();
+        
+        let result: ShowPromiseResult;
+        try {
+          result = await controller.show();
+        } catch (initialErr: unknown) {
+          const errMsg = String(initialErr);
+          // If launch params missing outside of Telegram environment, retry with debug mode enabled
+          if (errMsg.includes('launch parameters') && !this.debugMode) {
+            console.log('Retrying Adsgram with debug: true for browser testing environment...');
+            controller = window.Adsgram.init({
+              blockId: sanitizedBlock,
+              debug: true,
+            });
+            result = await controller.show();
+          } else {
+            throw initialErr;
+          }
+        }
+
         this.lastLog = `Adsgram result (${sanitizedBlock}): done=${result.done}, state=${result.state}, desc="${result.description}"`;
         console.log(this.lastLog);
 

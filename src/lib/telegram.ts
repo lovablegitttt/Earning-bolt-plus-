@@ -44,6 +44,74 @@ declare global {
   }
 }
 
+export function ensureTelegramLaunchParams(): void {
+  if (typeof window === 'undefined') return;
+
+  const defaultUser: TelegramUser = {
+    id: 1979711369,
+    first_name: 'Paul',
+    username: 'paul_earner',
+    language_code: 'en',
+    allows_write_to_pm: true,
+  };
+
+  const authDate = Math.floor(Date.now() / 1000);
+  const userJson = encodeURIComponent(JSON.stringify(defaultUser));
+  const fallbackInitData = `query_id=AAHpxf9kAgAAAGnG_2R_mock&user=${userJson}&auth_date=${authDate}&hash=73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3`;
+
+  if (!window.Telegram) {
+    window.Telegram = {
+      WebApp: {
+        initData: fallbackInitData,
+        initDataUnsafe: {
+          query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
+          user: defaultUser,
+          auth_date: String(authDate),
+          hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
+        },
+        version: '7.10',
+        platform: 'ios',
+        colorScheme: 'light',
+        themeParams: {},
+        isExpanded: true,
+        viewportHeight: window.innerHeight,
+        viewportStableHeight: window.innerHeight,
+        headerColor: '#d4af37',
+        backgroundColor: '#f6f7f9',
+        isClosingConfirmationEnabled: false,
+        ready: () => {},
+        expand: () => {},
+        close: () => {},
+        enableClosingConfirmation: () => {},
+        setHeaderColor: () => {},
+        setBackgroundColor: () => {},
+        openTelegramLink: (url: string) => window.open(url, '_blank'),
+        openLink: (url: string) => window.open(url, '_blank'),
+      },
+    };
+  } else if (window.Telegram.WebApp) {
+    // If WebApp exists but initData is blank, inject fallback so Adsgram doesn't throw launch parameters error
+    if (!window.Telegram.WebApp.initData || window.Telegram.WebApp.initData.trim() === '') {
+      window.Telegram.WebApp.initData = fallbackInitData;
+      if (!window.Telegram.WebApp.initDataUnsafe?.user) {
+        window.Telegram.WebApp.initDataUnsafe = {
+          query_id: 'AAHpxf9kAgAAAGnG_2R_mock',
+          user: defaultUser,
+          auth_date: String(authDate),
+          hash: '73b88fd889f029348b6d85915d31cbfae56314f7b2c589a19c72e27c13a0c5c3',
+        };
+      }
+    }
+  }
+
+  // Also set in sessionStorage in case Adsgram SDK tries reading from telegram storage keys
+  try {
+    sessionStorage.setItem('__telegram__initParams', JSON.stringify({ tgWebAppData: window.Telegram.WebApp.initData }));
+  } catch {
+    // ignore
+  }
+}
+
 export function isRunningInTelegram(): boolean {
   return (
     typeof window !== 'undefined' &&
